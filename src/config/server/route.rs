@@ -6,6 +6,9 @@ pub async fn route(server: &mut Server) {
         .router("/index", app::controller::index::func::index)
         .await;
     server
+        .router("/insert", app::controller::mysql::func::insert)
+        .await;
+    server
         .router(
             "/favicon.ico",
             app::controller::favicon_ico::func::favicon_ico,
