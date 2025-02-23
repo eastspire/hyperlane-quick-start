@@ -5,8 +5,9 @@ pub(crate) mod plugin;
 pub(crate) use hyperlane::*;
 pub(crate) use sqlx::{
     mysql::MySqlPoolOptions,
-    {query, MySql, Pool},
+    {query, MySql, MySqlPool, Pool},
 };
+pub(crate) use std::sync::Arc;
 
 #[tokio::main]
 async fn main() {
