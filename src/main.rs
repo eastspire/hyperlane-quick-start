@@ -3,6 +3,10 @@ pub(crate) mod config;
 pub(crate) mod init;
 pub(crate) mod plugin;
 pub(crate) use hyperlane::*;
+pub(crate) use sqlx::{
+    mysql::MySqlPoolOptions,
+    {query, MySql, Pool},
+};
 
 #[tokio::main]
 async fn main() {

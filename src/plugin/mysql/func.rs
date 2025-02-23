@@ -1,7 +1,5 @@
 use super::lazy::DB;
-use crate::futures::future::BoxFuture;
-use sqlx::mysql::MySqlPoolOptions;
-use sqlx::{query, MySql, Pool};
+use crate::*;
 
 pub async fn get_db_connection() -> Pool<MySql> {
     let db: Pool<MySql> = DB.read().await.clone().unwrap();
@@ -34,21 +32,19 @@ pub async fn create_table() {
     query(create_table_query).execute(&pool).await.unwrap();
 }
 
-pub async fn insert_record() -> BoxFuture<'static, Result<(), sqlx::Error>> {
+pub async fn insert_record() {
     let pool: Pool<MySql> = get_db_connection().await;
-    Box::pin(async move {
-        let insert_query: &str = r#"
+    let insert_query: &str = r#"
         INSERT INTO `visit` (`isdel`, `request`, `response`)
         VALUES (?, ?, ?)
     "#;
-        let request_data: Vec<u8> = vec![1, 2, 3, 4];
-        let response_data: Vec<u8> = vec![5, 6, 7, 8];
-        sqlx::query(insert_query)
-            .bind(0) // isdel
-            .bind(&request_data) // request
-            .bind(&response_data) // response
-            .execute(&pool) // 使用 Arc 中的 pool
-            .await?;
-        Ok(())
-    })
+    let request_data: Vec<u8> = vec![1, 2, 3, 4];
+    let response_data: Vec<u8> = vec![5, 6, 7, 8];
+    sqlx::query(insert_query)
+        .bind(0) // isdel
+        .bind(&request_data) // request
+        .bind(&response_data) // response
+        .execute(&pool) // 使用 Arc 中的 pool
+        .await
+        .unwrap();
 }
