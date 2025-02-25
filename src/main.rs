@@ -5,7 +5,7 @@ pub(crate) mod plugin;
 pub(crate) use hyperlane::*;
 pub(crate) use sqlx::{
     mysql::MySqlPoolOptions,
-    {query, MySql, MySqlPool, Pool},
+    {query, MySqlPool},
 };
 pub(crate) use std::sync::Arc;
 

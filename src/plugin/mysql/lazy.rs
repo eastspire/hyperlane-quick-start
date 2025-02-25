@@ -1,16 +1,4 @@
 use crate::*;
-use hyperlane::once_cell::sync::Lazy;
+use hyperlane::{once_cell::sync::Lazy, tokio::sync::RwLock};
 
-pub static DB: Lazy<Arc<MySqlPool>> = Lazy::new(|| {
-    let runtime = tokio::runtime::Runtime::new().unwrap();
-    runtime
-        .block_on(async {
-            let database_url = "mysql://root:SQS@localhost:4466";
-            MySqlPoolOptions::new()
-                .max_connections(100)
-                .connect(database_url)
-                .await
-                .unwrap()
-        })
-        .into()
-});
+pub static DB: Lazy<ArcRwLock<Option<MySqlPool>>> = Lazy::new(|| Arc::new(RwLock::new(None)));

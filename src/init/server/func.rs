@@ -16,6 +16,9 @@ pub async fn creat_server() {
     println_success!("Server init successfully");
     // tips
     println_success!("Server listen: ", host_port);
+    // Init mysql connection
+    plugin::mysql::func::init_db_connection().await;
+    println_success!("Mysql connection init");
     // Crate table
     plugin::mysql::func::create_table().await;
     println_success!("Mysql database crate");
