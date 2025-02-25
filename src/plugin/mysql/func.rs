@@ -2,13 +2,13 @@ use super::lazy::DB;
 use crate::*;
 
 pub async fn init_db_connection() {
-    let database_url = "mysql://root:SQS@localhost:4466/hyperlane";
-    let connection = MySqlPoolOptions::new()
+    let database_url: &str = "mysql://root:SQS@localhost:4466/hyperlane";
+    let connection: MySqlPool = MySqlPoolOptions::new()
         .max_connections(100)
         .connect(database_url)
         .await
         .unwrap();
-    let mut db = DB.write().await;
+    let mut db: tokio::sync::RwLockWriteGuard<'_, Option<MySqlPool>> = DB.write().await;
     *db = Some(connection);
 }
 
@@ -17,7 +17,7 @@ pub async fn get_db_connection() -> Option<MySqlPool> {
 }
 
 pub async fn create_table() {
-    let pool: MySqlPool = get_db_connection().await.unwrap();
+    let db: MySqlPool = get_db_connection().await.unwrap();
     let create_table_query: &str = r#"
         CREATE TABLE IF NOT EXISTS `visit` (
             `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -27,11 +27,11 @@ pub async fn create_table() {
             PRIMARY KEY (`id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='访问记录';
     "#;
-    query(create_table_query).execute(&pool).await.unwrap();
+    query(create_table_query).execute(&db).await.unwrap();
 }
 
 pub async fn insert_record() {
-    let pool: MySqlPool = get_db_connection().await.unwrap();
+    let db: MySqlPool = get_db_connection().await.unwrap();
     let insert_query: &str = r#"
         INSERT INTO `visit` (`isdel`, `request`, `response`)
         VALUES (?, ?, ?)
@@ -42,7 +42,7 @@ pub async fn insert_record() {
         .bind(0) // isdel
         .bind(&request_data)
         .bind(&response_data)
-        .execute(&pool)
+        .execute(&db)
         .await
         .unwrap();
 }
