@@ -1,6 +1,5 @@
-use hyperlane::serde_json::json;
-
-use crate::{plugin::mysql::func::insert_record, *};
+use crate::plugin::mysql::func::insert_record;
+use hyperlane::{serde_json::json, *};
 
 pub async fn insert(arc_lock_controller_data: ArcRwLockControllerData) {
     let response_data: String = json!({
