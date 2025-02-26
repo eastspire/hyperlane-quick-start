@@ -2,10 +2,10 @@ use super::lazy::DB;
 use crate::*;
 
 pub async fn init_db_connection() {
-    let database_url: &str = "mysql://root:SQS@localhost:4466/hyperlane";
+    let database_url: String = config::mysql::url::get_db_url();
     let connection: MySqlPool = MySqlPoolOptions::new()
         .max_connections(6)
-        .connect(database_url)
+        .connect(&database_url)
         .await
         .unwrap();
     let mut db: tokio::sync::RwLockWriteGuard<'_, Option<MySqlPool>> = DB.write().await;
@@ -30,7 +30,7 @@ pub async fn create_table() {
     query(create_table_query).execute(&db).await.unwrap();
 }
 
-pub async fn insert_record(req: &str, resp: &str) {
+pub async fn insert_record(request: &str, response: &str) {
     let db: MySqlPool = get_db_connection().await.unwrap();
     let insert_query: &str = r#"
         INSERT INTO `visit` (`isdel`, `request`, `response`)
@@ -38,8 +38,8 @@ pub async fn insert_record(req: &str, resp: &str) {
     "#;
     sqlx::query(insert_query)
         .bind(0) // isdel
-        .bind(&req)
-        .bind(&resp)
+        .bind(&request)
+        .bind(&response)
         .execute(&db)
         .await
         .unwrap();
