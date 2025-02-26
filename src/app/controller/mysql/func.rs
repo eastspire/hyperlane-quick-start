@@ -1,7 +1,6 @@
 use crate::{plugin::mysql::func::insert_record, *};
 
 pub async fn insert(arc_lock_controller_data: ArcRwLockControllerData) {
-    insert_record().await;
     let send_res: ResponseResult = arc_lock_controller_data
         .send_response(200, "hello hyperlane => /")
         .await;
@@ -10,4 +9,7 @@ pub async fn insert(arc_lock_controller_data: ArcRwLockControllerData) {
         format!("Response result => {:?}", send_res),
         log_debug_handler,
     );
+    let req: String = format!("{:?}", controller_data.get_request());
+    let resp: String = format!("{:?}", controller_data.get_response());
+    insert_record(&req, &resp).await;
 }

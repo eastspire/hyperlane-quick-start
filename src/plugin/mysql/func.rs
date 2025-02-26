@@ -4,7 +4,7 @@ use crate::*;
 pub async fn init_db_connection() {
     let database_url: &str = "mysql://root:SQS@localhost:4466/hyperlane";
     let connection: MySqlPool = MySqlPoolOptions::new()
-        .max_connections(100)
+        .max_connections(6)
         .connect(database_url)
         .await
         .unwrap();
@@ -22,26 +22,24 @@ pub async fn create_table() {
         CREATE TABLE IF NOT EXISTS `visit` (
             `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
             `isdel` bigint(20) UNSIGNED DEFAULT 0,
-            `request` longblob DEFAULT '',
-            `response` longblob DEFAULT '',
+            `request` longtext DEFAULT '',
+            `response` longtext DEFAULT '',
             PRIMARY KEY (`id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='访问记录';
     "#;
     query(create_table_query).execute(&db).await.unwrap();
 }
 
-pub async fn insert_record() {
+pub async fn insert_record(req: &str, resp: &str) {
     let db: MySqlPool = get_db_connection().await.unwrap();
     let insert_query: &str = r#"
         INSERT INTO `visit` (`isdel`, `request`, `response`)
         VALUES (?, ?, ?)
     "#;
-    let request_data: Vec<u8> = vec![1, 2, 3, 4];
-    let response_data: Vec<u8> = vec![5, 6, 7, 8];
     sqlx::query(insert_query)
         .bind(0) // isdel
-        .bind(&request_data)
-        .bind(&response_data)
+        .bind(&req)
+        .bind(&resp)
         .execute(&db)
         .await
         .unwrap();
