@@ -678,9 +678,9 @@ checksum = "0e12cb1453c646f80c681382a4e3da4b7345e1f6d4ff6ffd6f12909f5d00740d"
 
 [[package]]
 name = "http-type"
-version = "3.6.0"
+version = "3.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9352577ef33cb4ddf19c6c3cb67b5321baabc91ff5118b8bb9fde7bf3d05d345"
+checksum = "67be2f971eb4f71ccbed17c4262f77965f9c191d2385cfa9031f6bb98226152a"
 dependencies = [
  "hex",
  "http-compress",
@@ -696,9 +696,9 @@ dependencies = [
 
 [[package]]
 name = "hyperlane"
-version = "4.13.0"
+version = "4.13.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "90db025c3ddff47de73db14f8771de40861adfc270ee34f4e407842aa13a2960"
+checksum = "9b3cbd7e157da618e53c67ba5621fb9956d1f657cb7200cf15572d918db06381"
 dependencies = [
  "async-func",
  "clonelicious",
@@ -722,9 +722,9 @@ dependencies = [
 
 [[package]]
 name = "hyperlane-log"
-version = "1.1.28"
+version = "1.1.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc4b03955c5ff34f7c3b8365fefff1499895da4a42436426e2952fbceee97cf4"
+checksum = "91f621ced5e52ee99a4375810992cd5c71e26dbe33908f0d23b341d0f93230b0"
 dependencies = [
  "file-operation",
  "hyperlane-time",
