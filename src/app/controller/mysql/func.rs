@@ -17,7 +17,7 @@ pub async fn insert(arc_lock_controller_data: ArcRwLockControllerData) {
         format!("Response result => {:?}", send_result),
         log_debug_handler,
     );
-    let request: String = format!("{:?}", controller_data.get_request());
-    let response: String = format!("{:?}", controller_data.get_response());
+    let request: String = controller_data.get_request().to_string();
+    let response: String = controller_data.get_response().to_string();
     insert_record(&request, &response).await;
 }
