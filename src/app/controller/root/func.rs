@@ -1,5 +1,4 @@
-use crate::*;
-use hyperlane::tokio::time::sleep;
+use crate::{tokio::time::sleep, *};
 use std::time::Duration;
 
 pub async fn root(controller_data: ControllerData) {
