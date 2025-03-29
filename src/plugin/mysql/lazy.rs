@@ -1,4 +1,4 @@
+use super::func::init_db_connection;
 use crate::*;
-use hyperlane::{once_cell::sync::Lazy, tokio::sync::RwLock};
 
-pub static DB: Lazy<ArcRwLock<Option<MySqlPool>>> = Lazy::new(|| Arc::new(RwLock::new(None)));
+pub static DB: Lazy<MySqlPool> = Lazy::new(|| block_on(async { init_db_connection().await }));
