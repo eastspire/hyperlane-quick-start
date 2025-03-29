@@ -1,5 +1,5 @@
 use crate::*;
 
-pub async fn print(server: &mut Server) {
-    server.print(true).await;
+pub async fn print(server: &Server) {
+    server.inner_print(true).await;
 }

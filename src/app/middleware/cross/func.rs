@@ -1,9 +1,8 @@
 use crate::*;
 
-pub async fn cross(arc_lock_controller_data: ArcRwLockControllerData) {
-    let mut controller_data: RwLockWriteControllerData =
-        arc_lock_controller_data.get_write_lock().await;
-    let response: &mut Response = controller_data.get_mut_response();
+pub async fn cross(ctx: Context) {
+    let mut ctx: RwLockWriteInnerContext = ctx.get_write_lock().await;
+    let response: &mut Response = ctx.get_mut_response();
     response
         .set_header(ACCESS_CONTROL_ALLOW_ORIGIN, ANY)
         .set_header(ACCESS_CONTROL_ALLOW_METHODS, GET_POST_OPTIONS)

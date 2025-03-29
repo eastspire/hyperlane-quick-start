@@ -1,18 +1,14 @@
 use crate::*;
 
-pub async fn favicon_ico(arc_lock_controller_data: ArcRwLockControllerData) {
+pub async fn favicon_ico(ctx: Context) {
     let data: Vec<u8> = plugin::logo_img::func::get_logo_img();
     {
-        let mut controller_data: RwLockWriteControllerData =
-            arc_lock_controller_data.get_write_lock().await;
-        let response: &mut Response = controller_data.get_mut_response();
+        let mut ctx: RwLockWriteInnerContext = ctx.get_write_lock().await;
+        let response: &mut Response = ctx.get_mut_response();
         response.set_header(CONTENT_TYPE, IMAGE_PNG);
         response.set_header(CACHE_CONTROL, "public, max-age=3600");
     }
-    let send_res: ResponseResult = arc_lock_controller_data.send_response(200, data).await;
-    arc_lock_controller_data
-        .get_controller_data()
-        .await
-        .get_log()
-        .info(format!("Response result => {:?}", send_res), log_handler);
+    let send_res: ResponseResult = ctx.send_response(200, data).await;
+    ctx.log_info(&format!("Response result => {:?}", send_res), log_handler)
+        .await;
 }

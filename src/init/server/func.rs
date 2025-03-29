@@ -1,6 +1,6 @@
 use crate::*;
 
-pub async fn creat_server() {
+pub async fn create_server() {
     // server init
     let mut server: Server = Server::new();
     config::server::host::host(&mut server).await;
@@ -8,7 +8,6 @@ pub async fn creat_server() {
     config::server::print::print(&mut server).await;
     config::server::log::log_dir(&mut server).await;
     config::server::log::log_size(&mut server).await;
-    config::server::log::log_interval_millis(&mut server).await;
     config::server::route::route(&mut server).await;
     config::server::middleware::middleware(&mut server).await;
     let cfg: ServerConfig<'_> = server.get_cfg().read().await.clone();
@@ -23,9 +22,9 @@ pub async fn creat_server() {
     plugin::mysql::func::create_table().await;
     println_success!("Mysql database crate");
     // server listen
-    server.listen().await;
+    server.listen().await.unwrap();
 }
 
 pub async fn run() {
-    plugin::server_manager::func::creat_server_manage(creat_server).await;
+    plugin::server_manager::func::create_server_manage(create_server).await;
 }
