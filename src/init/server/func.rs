@@ -1,4 +1,4 @@
-use crate::*;
+use crate::{config::server::constant::SERVER_PORT, *};
 use config::server::*;
 use tokio::runtime::{Builder, Runtime};
 
@@ -29,8 +29,7 @@ async fn create_server() {
     route::register(&server).await;
     request_middleware::register(&server).await;
     response_middleware::register(&server).await;
-    let cfg: ServerConfig<'_> = server.get_cfg().read().await.clone();
-    let host_port: String = format!("{}:{}", cfg.get_host(), cfg.get_port());
+    let host_port: String = format!("{}:{}", SERVER_HOST, SERVER_PORT);
     println_success!("Server initialization successful");
     let server_result: ServerResult = server.listen().await;
     match server_result {
