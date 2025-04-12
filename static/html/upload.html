@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>文件分块上传示例</title>
+    <style>
+      body {
+        font-family: 'Arial', sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      h1 {
+        color: #333;
+        text-align: center;
+      }
+      .upload-container {
+        background-color: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .file-input-container {
+        margin-bottom: 20px;
+      }
+      .file-input {
+        display: none;
+      }
+      .file-input-label {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #4caf50;
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      .file-input-label:hover {
+        background-color: #45a049;
+      }
+      .selected-file {
+        margin-top: 10px;
+        font-size: 14px;
+      }
+      .progress-container {
+        margin-top: 20px;
+      }
+      .progress-bar {
+        height: 20px;
+        background-color: #e0e0e0;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 10px;
+      }
+      .progress-fill {
+        height: 100%;
+        background-color: #4caf50;
+        width: 0%;
+        transition: width 0.3s ease;
+      }
+      .progress-text {
+        text-align: center;
+        font-size: 14px;
+      }
+      .upload-btn {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        background-color: #2196f3;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        margin-top: 20px;
+        transition: background-color 0.3s;
+      }
+      .upload-btn:hover {
+        background-color: #0b7dda;
+      }
+      .upload-btn:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+      }
+      .status {
+        margin-top: 20px;
+        padding: 10px;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+      .success {
+        background-color: #dff0d8;
+        color: #3c763d;
+      }
+      .error {
+        background-color: #f2dede;
+        color: #a94442;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>文件分块上传</h1>
+    <div class="upload-container">
+      <div class="file-input-container">
+        <label for="file-input" class="file-input-label">选择文件</label>
+        <input type="file" id="file-input" class="file-input" />
+        <div class="selected-file" id="selected-file">未选择文件</div>
+      </div>
+
+      <div
+        class="progress-container"
+        id="progress-container"
+        style="display: none"
+      >
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-text" id="progress-text">0%</div>
+      </div>
+
+      <button class="upload-btn" id="upload-btn" disabled>上传文件</button>
+
+      <div class="status" id="status" style="display: none"></div>
+    </div>
+
+    <script>
+      const CHUNK_SIZE = 1024 * 1024;
+      const UPLOAD_URL = '/upload';
+
+      const fileInput = document.getElementById('file-input');
+      const selectedFileEl = document.getElementById('selected-file');
+      const uploadBtn = document.getElementById('upload-btn');
+      const progressContainer = document.getElementById('progress-container');
+      const progressFill = document.getElementById('progress-fill');
+      const progressText = document.getElementById('progress-text');
+      const statusEl = document.getElementById('status');
+
+      let selectedFile = null;
+
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          selectedFile = e.target.files[0];
+          selectedFileEl.textContent = `已选择: ${
+            selectedFile.name
+          } (${formatFileSize(selectedFile.size)})`;
+          uploadBtn.disabled = false;
+        } else {
+          selectedFile = null;
+          selectedFileEl.textContent = '未选择文件';
+          uploadBtn.disabled = true;
+        }
+      });
+
+      uploadBtn.addEventListener('click', () => {
+        if (selectedFile) {
+          uploadFile(selectedFile);
+        }
+      });
+
+      async function uploadFile(file) {
+        resetStatus();
+        progressContainer.style.display = 'block';
+        uploadBtn.disabled = true;
+        const fileId = generateUniqueId();
+        const totalChunks = Math.ceil(selectedFile.size / CHUNK_SIZE);
+        let uploadedChunks = 0;
+        const uploadTasks = [];
+        for (let i = 0; i < totalChunks; i++) {
+          const start = i * CHUNK_SIZE;
+          const end = Math.min(start + CHUNK_SIZE, selectedFile.size);
+          const chunk = selectedFile.slice(start, end);
+          uploadTasks.push(uploadChunk(chunk, i, totalChunks, fileId));
+        }
+        const progress = (uploadedChunks / totalChunks) * 100;
+        progressBar.style.width = progress + '%';
+        Promise.all(uploadTasks)
+          .then(() => {
+            uploadButton.disabled = false;
+          })
+          .catch((error) => {
+            console.error('Upload failed:', error);
+            uploadButton.disabled = false;
+          });
+      }
+
+      function uploadChunk(chunk, index, totalChunks, fileId) {
+        const headers = {
+          'X-File-Id': fileId,
+          'X-Chunk-Index': index,
+          'X-Total-Chunks': totalChunks,
+          'X-File-Name': selectedFile.name,
+        };
+        return fetch(UPLOAD_URL, {
+          method: 'POST',
+          headers: headers,
+          body: chunk,
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.text();
+          })
+          .then(() => {
+            progressBar.style.width = ((index + 1) / totalChunks) * 100 + '%';
+          });
+      }
+
+      function resetUpload() {
+        progressBar.style.width = '0%';
+        progressBar.style.display = 'none';
+        uploadButton.disabled = true;
+      }
+
+      function generateUniqueId() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2);
+      }
+
+      function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+      }
+    </script>
+  </body>
+</html>

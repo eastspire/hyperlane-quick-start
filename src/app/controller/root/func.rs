@@ -1,6 +1,6 @@
 use crate::*;
 
-static UPLOAD_HTML: &str = include_str!("../../../../static/upload.html");
+static UPLOAD_HTML: &str = include_str!("../../../../static/html/upload.html");
 
 pub async fn handle(ctx: Context) {
     ctx.set_response_header(CONTENT_TYPE, content_type_charset(TEXT_HTML, UTF8))
