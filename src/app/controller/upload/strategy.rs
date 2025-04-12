@@ -2,11 +2,11 @@ use crate::*;
 use std::{
     collections::HashMap,
     fs::{self, File, OpenOptions},
-    io::Write,
+    io::{BufWriter, Write},
     path::Path,
     sync::Arc,
 };
-use tokio::sync::RwLock;
+use tokio::sync::{RwLock, RwLockWriteGuard};
 
 pub trait UploadStrategy: Send + Sync {
     async fn handle_upload(
@@ -51,18 +51,18 @@ impl ChunkUploadStrategy {
         file_name: &str,
         total_chunks: usize,
     ) -> Result<String, String> {
-        let final_path = format!("{}/{}", self.upload_dir, file_name);
-        let output_file = OpenOptions::new()
+        let final_path: String = format!("{}/{}", self.upload_dir, file_name);
+        let output_file: File = OpenOptions::new()
             .create(true)
             .write(true)
             .open(&final_path)
             .map_err(|e| format!("Failed to create output file: {}", e))?;
 
-        let mut writer = std::io::BufWriter::new(output_file);
+        let mut writer: BufWriter<File> = BufWriter::new(output_file);
 
         for i in 0..total_chunks {
-            let chunk_path = format!("{}/{}_{}", self.upload_dir, file_id, i);
-            let chunk_data =
+            let chunk_path: String = format!("{}/{}_{}", self.upload_dir, file_id, i);
+            let chunk_data: Vec<u8> =
                 fs::read(&chunk_path).map_err(|e| format!("Failed to read chunk {}: {}", i, e))?;
 
             writer
@@ -91,11 +91,12 @@ impl UploadStrategy for ChunkUploadStrategy {
                 .map_err(|e| format!("Failed to create upload directory: {}", e))?;
         }
 
-        let chunk_path = format!("{}/{}_{}", self.upload_dir, file_id, chunk_index);
+        let chunk_path: String = format!("{}/{}_{}", self.upload_dir, file_id, chunk_index);
         self.save_chunk(&chunk_path, &chunk_data).await?;
 
-        let mut uploading_files = self.uploading_files.write().await;
-        let chunks_status = uploading_files
+        let mut uploading_files: RwLockWriteGuard<'_, HashMap<String, Vec<bool>>> =
+            self.uploading_files.write().await;
+        let chunks_status: &mut Vec<bool> = uploading_files
             .entry(file_id.clone())
             .or_insert_with(|| vec![false; total_chunks]);
 
@@ -107,7 +108,7 @@ impl UploadStrategy for ChunkUploadStrategy {
             chunks_status[chunk_index] = true;
         }
 
-        let all_chunks_uploaded = chunks_status.iter().all(|&status| status);
+        let all_chunks_uploaded: bool = chunks_status.iter().all(|&status| status);
 
         if all_chunks_uploaded {
             uploading_files.remove(&file_id);
