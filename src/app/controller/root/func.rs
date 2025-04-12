@@ -1,5 +1,10 @@
 use crate::*;
 
+static UPLOAD_HTML: &str = include_str!("../../../../static/upload.html");
+
 pub async fn handle(ctx: Context) {
-    let _ = ctx.set_response_body("Hello hyperlane => /").await;
+    ctx.set_response_header(CONTENT_TYPE, content_type_charset(TEXT_HTML, UTF8))
+        .await
+        .set_response_body(UPLOAD_HTML)
+        .await;
 }

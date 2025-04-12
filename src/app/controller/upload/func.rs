@@ -23,7 +23,7 @@ pub async fn handle(ctx: Context) {
     let file_id = match ctx.get_request_header("x-file-id").await {
         Some(id) => id,
         None => {
-            let _ = ctx.send_response(400, b"Missing X-File-Id header").await;
+            let _ = ctx.set_response_body(b"Missing X-File-Id header").await;
             return;
         }
     };
@@ -32,16 +32,12 @@ pub async fn handle(ctx: Context) {
         Some(idx) => match idx.parse::<usize>() {
             Ok(i) => i,
             Err(_) => {
-                let _ = ctx
-                    .send_response(400, b"Invalid X-Chunk-Index header")
-                    .await;
+                let _ = ctx.set_response_body(b"Invalid X-Chunk-Index header").await;
                 return;
             }
         },
         None => {
-            let _ = ctx
-                .send_response(400, b"Missing X-Chunk-Index header")
-                .await;
+            let _ = ctx.set_response_body(b"Missing X-Chunk-Index header").await;
             return;
         }
     };
@@ -51,14 +47,14 @@ pub async fn handle(ctx: Context) {
             Ok(t) => t,
             Err(_) => {
                 let _ = ctx
-                    .send_response(400, b"Invalid X-Total-Chunks header")
+                    .set_response_body(b"Invalid X-Total-Chunks header")
                     .await;
                 return;
             }
         },
         None => {
             let _ = ctx
-                .send_response(400, b"Missing X-Total-Chunks header")
+                .set_response_body(b"Missing X-Total-Chunks header")
                 .await;
             return;
         }
@@ -67,7 +63,7 @@ pub async fn handle(ctx: Context) {
     let file_name = match ctx.get_request_header("x-file-name").await {
         Some(name) => name,
         None => {
-            let _ = ctx.send_response(400, b"Missing X-File-Name header").await;
+            let _ = ctx.set_response_body(b"Missing X-File-Name header").await;
             return;
         }
     };
@@ -75,7 +71,7 @@ pub async fn handle(ctx: Context) {
     // 获取请求体（文件块数据）
     let chunk_data: Vec<u8> = ctx.get_request_body().await;
     if chunk_data.is_empty() {
-        let _ = ctx.send_response(400, b"Empty chunk data").await;
+        let _ = ctx.set_response_body(b"Empty chunk data").await;
         return;
     }
 
@@ -85,17 +81,14 @@ pub async fn handle(ctx: Context) {
         Ok(mut file) => {
             if let Err(e) = file.write_all(&chunk_data) {
                 let _ = ctx
-                    .send_response(500, format!("Failed to write chunk: {}", e).as_bytes())
+                    .set_response_body(format!("Failed to write chunk: {}", e).as_bytes())
                     .await;
                 return;
             }
         }
         Err(e) => {
             let _ = ctx
-                .send_response(
-                    500,
-                    format!("Failed to create chunk file: {}", e).as_bytes(),
-                )
+                .set_response_body(format!("Failed to create chunk file: {}", e).as_bytes())
                 .await;
             return;
         }
@@ -143,8 +136,7 @@ pub async fn handle(ctx: Context) {
                         Ok(data) => {
                             if let Err(e) = output_file.write_all(&data) {
                                 let _ = ctx
-                                    .send_response(
-                                        500,
+                                    .set_response_body(
                                         format!("Failed to write to output file: {}", e).as_bytes(),
                                     )
                                     .await;
@@ -156,8 +148,7 @@ pub async fn handle(ctx: Context) {
                         }
                         Err(e) => {
                             let _ = ctx
-                                .send_response(
-                                    500,
+                                .set_response_body(
                                     format!("Failed to read chunk {}: {}", i, e).as_bytes(),
                                 )
                                 .await;
@@ -169,8 +160,7 @@ pub async fn handle(ctx: Context) {
 
                 if success {
                     let _ = ctx
-                        .send_response(
-                            200,
+                        .set_response_body(
                             format!("File {} uploaded successfully", file_name).as_bytes(),
                         )
                         .await;
@@ -178,18 +168,14 @@ pub async fn handle(ctx: Context) {
             }
             Err(e) => {
                 let _ = ctx
-                    .send_response(
-                        500,
-                        format!("Failed to create output file: {}", e).as_bytes(),
-                    )
+                    .set_response_body(format!("Failed to create output file: {}", e).as_bytes())
                     .await;
             }
         }
     } else {
         // 如果还有块未上传，返回当前块上传成功
         let _ = ctx
-            .send_response(
-                200,
+            .set_response_body(
                 format!(
                     "Chunk {} of {} uploaded successfully",
                     chunk_index + 1,

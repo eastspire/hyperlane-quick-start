@@ -19,7 +19,7 @@ exclude = [
 ]
 
 [dependencies]
-hyperlane = "4.72.0"
+hyperlane = "4.79.0"
 
 [profile.dev]
 incremental = true
