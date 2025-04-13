@@ -576,7 +576,7 @@ dependencies = [
 
 [[package]]
 name = "hyperlane-quick-start"
-version = "0.63.2"
+version = "0.64.0"
 dependencies = [
  "bin-encode-decode",
  "chrono",
@@ -589,6 +589,7 @@ dependencies = [
 
 [[package]]
 name = "hyperlane-time"
+version = "0.4.0"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6aa55a670a0db8677da642e02e3bd61d4fca3765b9d943f9429e4b0e5c5fd7e5"
