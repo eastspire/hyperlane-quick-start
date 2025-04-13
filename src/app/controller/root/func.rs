@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 
 static UPLOAD_HTML: &str = include_str!("../../../../static/html/upload.html");
 
