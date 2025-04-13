@@ -1,7 +1,5 @@
 use super::*;
 
-static UPLOAD_HTML: &str = include_str!("../../../../static/html/upload.html");
-
 async fn get_file_full_path(req_file_path: &str) -> String {
     let now: chrono::DateTime<chrono::Local> = chrono::Local::now();
     let year: String = now.format("%Y").to_string();
@@ -39,6 +37,6 @@ pub async fn handle(ctx: Context) {
     let path: String = format!("{}/{}", dir, file);
     ctx.set_response_header(CONTENT_TYPE, content_type_charset(TEXT_HTML, UTF8))
         .await
-        .set_response_body(UPLOAD_HTML)
+        .set_response_body("")
         .await;
 }
