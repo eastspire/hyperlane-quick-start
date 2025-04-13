@@ -1,4 +1,4 @@
-use hyperlane::OptionDuration;
+use super::*;
 
 pub(crate) static SERVER_PORT: usize = 60000;
 pub(crate) static SERVER_HOST: &str = "0.0.0.0";

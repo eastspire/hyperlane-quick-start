@@ -1,7 +1,4 @@
-use crate::{config::upload::upload::UPLOAD_DIR, *};
-use rand::TryRngCore;
-use sha2::{Digest, Sha256};
-use std::path::PathBuf;
+use super::*;
 
 static UPLOAD_HTML: &str = include_str!("../../../../static/html/upload.html");
 
@@ -34,8 +31,8 @@ fn replace_prefix_with_hash(input: &str) -> String {
 }
 
 pub async fn handle(ctx: Context) {
-    let dir: String = ctx.get_route_param("dir").await.unwrap_or_default();
-    let file: String = ctx.get_route_param("file").await.unwrap_or_default();
+    let dir: String = ctx.get_route_param(DIR_KEY).await.unwrap_or_default();
+    let file: String = ctx.get_route_param(FILE_KEY).await.unwrap_or_default();
     if dir.is_empty() || file.is_empty() {
         return;
     }
