@@ -478,7 +478,7 @@ dependencies = [
 
 [[package]]
 name = "hyperlane-quick-start"
-version = "0.63.1"
+version = "0.63.2"
 dependencies = [
  "chunkify",
  "hyperlane",
