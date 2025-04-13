@@ -54,7 +54,7 @@ pub async fn handle(ctx: Context) {
     };
 
     let file_name: String = match ctx.get_request_header(CHUNKIFY_FILE_NAME_HEADER).await {
-        Some(name) => name,
+        Some(name) => urlencoding::decode(&name).unwrap_or_default().into_owned(),
         None => {
             let _ = ctx
                 .set_response_body(ChunkStrategyError::MissingFileName)
