@@ -89,7 +89,8 @@ pub async fn handle(ctx: Context) {
             let code: i32 = if url.is_empty() { 100 } else { 200 };
             let data: UploadResponse<'_> = UploadResponse {
                 code: code,
-                data: url,
+                url: &url,
+                name: &file_name,
                 msg: OK,
             };
             let data_json: String = serde_json::to_string(&data).unwrap_or_default();
@@ -98,7 +99,8 @@ pub async fn handle(ctx: Context) {
         Err(error) => {
             let data: UploadResponse<'_> = UploadResponse {
                 code: 0,
-                data: url,
+                url: &url,
+                name: &file_name,
                 msg: &error.to_string(),
             };
             let data_json: String = serde_json::to_string(&data).unwrap_or_default();
