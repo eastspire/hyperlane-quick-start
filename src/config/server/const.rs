@@ -1,11 +1,11 @@
-use hyperlane::OptionDuration;
+use super::*;
 
-pub(crate) const SERVER_PORT: usize = 60000;
+pub(crate) const SERVER_PORT: usize = 60006;
 pub(crate) const SERVER_HOST: &str = "0.0.0.0";
 pub(crate) const SERVER_WEB_SOCKET_BUFFER_SIZE: usize = 4096;
 pub(crate) const SERVER_HTTP_LINE_BUFFER_SIZE: usize = 4096;
 pub(crate) const SERVER_LOG_SIZE: usize = 100_024_000;
-pub(crate) const SERVER_LOG_DIR: &str = "./logs";
+pub(crate) const SERVER_LOG_DIR: &str = "/home/file-chunk/logs";
 pub(crate) const SERVER_INNER_PRINT: bool = true;
 pub(crate) const SERVER_INNER_LOG: bool = true;
 pub(crate) const SERVER_NODELAY: bool = true;

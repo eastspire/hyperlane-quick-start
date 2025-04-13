@@ -1,1 +1,1 @@
-pub(crate) const UPLOAD_DIR: &str = "/home/uploads";
+pub(crate) const UPLOAD_DIR: &str = "/home/file-chunk/files";

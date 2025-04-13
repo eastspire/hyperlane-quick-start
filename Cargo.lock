@@ -488,6 +488,7 @@ dependencies = [
  "bin-encode-decode",
  "chunkify",
  "hyperlane",
+ "serde",
 ]
 
 [[package]]

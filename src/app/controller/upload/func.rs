@@ -1,5 +1,4 @@
 use super::*;
-use crate::{config::charset::r#const::CHARSET, *};
 
 fn get_base_file_dir() -> String {
     let (year, month, day, hour, minute, _, _, _) = calculate_time();
@@ -78,8 +77,8 @@ pub async fn handle(ctx: Context) {
     let mut url: String = String::new();
     if chunk_index + 1 == total_chunks {
         let url_encode_dir: String =
-            encode(CHARSET, &format!("{base_file_dir}/{file_id}")).unwrap_or_default();
-        let url_encode_dir_file_name: String = encode(CHARSET, &file_name).unwrap_or_default();
+            encode(CHARSETS, &format!("{base_file_dir}/{file_id}")).unwrap_or_default();
+        let url_encode_dir_file_name: String = encode(CHARSETS, &file_name).unwrap_or_default();
         url = format!("/{url_encode_dir}/{url_encode_dir_file_name}");
     }
     match upload_strategy
@@ -87,10 +86,22 @@ pub async fn handle(ctx: Context) {
         .await
     {
         Ok(_) => {
-            let _ = ctx.set_response_body(url).await;
+            let data: UploadResponse<'_> = UploadResponse {
+                code: 1,
+                data: url,
+                msg: OK,
+            };
+            let data_json: String = serde_json::to_string(&data).unwrap_or_default();
+            let _ = ctx.set_response_body(data_json).await;
         }
         Err(error) => {
-            let _ = ctx.set_response_body(error).await;
+            let data: UploadResponse<'_> = UploadResponse {
+                code: 0,
+                data: url,
+                msg: &error.to_string(),
+            };
+            let data_json: String = serde_json::to_string(&data).unwrap_or_default();
+            let _ = ctx.set_response_body(data_json).await;
         }
     }
 }
