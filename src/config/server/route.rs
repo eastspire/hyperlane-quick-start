@@ -1,7 +1,7 @@
 use super::*;
 use app::controller::{
     self,
-    r#static::constant::{DIR_KEY, FILE_KEY},
+    r#static::r#const::{DIR_KEY, FILE_KEY},
 };
 
 pub async fn register(server: &Server) {
