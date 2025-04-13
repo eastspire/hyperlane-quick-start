@@ -12,8 +12,9 @@ pub(crate) mod route;
 pub(crate) mod ttl;
 
 pub(super) use super::*;
-pub(super) use app::controller;
-pub(super) use app::middleware::request;
-pub(super) use app::middleware::response;
+pub(super) use app::{
+    controller,
+    middleware::{request, response},
+};
 
 pub(crate) use r#const::*;
