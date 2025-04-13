@@ -1,13 +1,10 @@
 use super::*;
-use app::controller::{
-    self,
-    r#static::r#const::{DIR_KEY, FILE_KEY},
-};
+use config::r#static::r#const::*;
 
 pub async fn register(server: &Server) {
     server.route("/", controller::root::func::handle).await;
     server
-        .route("/favicon.ico", controller::favicon_ico::func::favicon_ico)
+        .route("/favicon.ico", controller::favicon_ico::func::handle)
         .await;
     server
         .route("/upload", controller::upload::func::handle)
