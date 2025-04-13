@@ -11,7 +11,7 @@ pub async fn register(server: &Server) {
         .await;
     server
         .route(
-            format!("/static/:{DIR_KEY}/:{FILE_KEY}"),
+            format!("/{STATIC_ROUTE}/:{DIR_KEY}/:{FILE_KEY}"),
             controller::r#static::func::handle,
         )
         .await;

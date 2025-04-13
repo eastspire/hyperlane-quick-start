@@ -79,15 +79,16 @@ pub async fn handle(ctx: Context) {
         let url_encode_dir: String =
             encode(CHARSETS, &format!("{base_file_dir}/{file_id}")).unwrap_or_default();
         let url_encode_dir_file_name: String = encode(CHARSETS, &file_name).unwrap_or_default();
-        url = format!("/{url_encode_dir}/{url_encode_dir_file_name}");
+        url = format!("/{STATIC_ROUTE}/{url_encode_dir}/{url_encode_dir_file_name}");
     }
     match upload_strategy
         .handle(&file_name, &chunk_data, &file_id, chunk_index, total_chunks)
         .await
     {
         Ok(_) => {
+            let code: i32 = if url.is_empty() { 100 } else { 200 };
             let data: UploadResponse<'_> = UploadResponse {
-                code: 1,
+                code: code,
                 data: url,
                 msg: OK,
             };

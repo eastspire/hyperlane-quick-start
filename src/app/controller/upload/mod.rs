@@ -1,8 +1,8 @@
 pub(crate) mod func;
 pub(crate) mod r#struct;
 
-pub(super) use crate::{
-    config::{charset::r#const::*, upload::r#const::*},
+pub(super) use super::{
+    config::{charset::r#const::*, r#static::r#const::*, upload::r#const::*},
     serde::Serialize,
     *,
 };

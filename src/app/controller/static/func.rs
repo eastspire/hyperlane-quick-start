@@ -5,6 +5,7 @@ pub async fn handle(ctx: Context) {
     let file: String = ctx.get_route_param(FILE_KEY).await.unwrap_or_default();
     let decode_dir: String = decode(CHARSET, &dir).unwrap_or_default();
     let decode_file: String = decode(CHARSET, &file).unwrap_or_default();
+    println_success!(dir, "\n", file, "\n", decode_dir, "\n", decode_file);
     if decode_dir.is_empty() || decode_file.is_empty() {
         return;
     }
