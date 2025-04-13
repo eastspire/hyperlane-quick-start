@@ -7,5 +7,8 @@ pub async fn register(server: &Server) {
         .route("/favicon.ico", favicon_ico::func::favicon_ico)
         .await;
     server.route("/upload", upload::func::handle).await;
+    server
+        .route("/static/:dir/:file", r#static::func::handle)
+        .await;
     println_success!("Server route initialization completed");
 }

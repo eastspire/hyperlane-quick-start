@@ -126,7 +126,7 @@
     </div>
 
     <script>
-      const CHUNK_SIZE = 1024 * 1024;
+      const CHUNK_SIZE = 512 * 1024;
       const UPLOAD_URL = '/upload';
 
       const fileInput = document.getElementById('file-input');
@@ -136,6 +136,7 @@
       const progressFill = document.getElementById('progress-fill');
       const progressText = document.getElementById('progress-text');
       const statusEl = document.getElementById('status');
+      const progressBar = progressFill;
 
       let selectedFile = null;
 
@@ -173,15 +174,15 @@
           const chunk = selectedFile.slice(start, end);
           uploadTasks.push(uploadChunk(chunk, i, totalChunks, fileId));
         }
-        const progress = (uploadedChunks / totalChunks) * 100;
-        progressBar.style.width = progress + '%';
         Promise.all(uploadTasks)
           .then(() => {
-            uploadButton.disabled = false;
+            uploadBtn.disabled = false;
+            showStatus('上传成功', 'success');
           })
           .catch((error) => {
             console.error('Upload failed:', error);
-            uploadButton.disabled = false;
+            uploadBtn.disabled = false;
+            showStatus('上传失败: ' + error.message, 'error');
           });
       }
 
@@ -204,14 +205,24 @@
             return response.text();
           })
           .then(() => {
-            progressBar.style.width = ((index + 1) / totalChunks) * 100 + '%';
+            const progress = ((index + 1) / totalChunks) * 100;
+            progressBar.style.width = progress + '%';
+            progressText.textContent = Math.round(progress) + '%';
           });
       }
 
-      function resetUpload() {
+      function resetStatus() {
         progressBar.style.width = '0%';
-        progressBar.style.display = 'none';
-        uploadButton.disabled = true;
+        progressContainer.style.display = 'block';
+        uploadBtn.disabled = true;
+        statusEl.style.display = 'none';
+        progressText.textContent = '0%';
+      }
+
+      function showStatus(message, type) {
+        statusEl.textContent = message;
+        statusEl.className = 'status ' + type;
+        statusEl.style.display = 'block';
       }
 
       function generateUniqueId() {

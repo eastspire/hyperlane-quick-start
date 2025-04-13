@@ -19,7 +19,8 @@ exclude = [
 ]
 
 [dependencies]
-hyperlane = "4.80.0"
+chunkify = "0.3.0"
+hyperlane = "4.80.1"
 
 [profile.dev]
 incremental = true
