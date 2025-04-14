@@ -17,6 +17,10 @@ pub async fn handle(ctx: Context) {
         .await
         .set_response_header(CONTENT_TYPE, content_type)
         .await
+        .set_response_header(CACHE_CONTROL, "public, max-age=31536000, immutable")
+        .await
+        .set_response_header(EXPIRES, "Wed, 1 Apr 8888 00:00:00 GMT")
+        .await
         .set_response_body(data)
         .await;
 }
