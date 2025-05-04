@@ -336,7 +336,6 @@
       const statusEl = document.getElementById('status');
       const uploadBtnStyle = document.querySelector('.upload-btn');
       let selectedFile = null;
-      let directoryPath = '';
       if (uploadBtnStyle) {
         uploadBtnStyle.remove();
       }
@@ -465,30 +464,6 @@
         });
         e.target.value = '';
       });
-      async function uploadChunk(chunk, index, totalChunks, fileId, file) {
-        const headers = {
-          'X-File-Id': fileId,
-          'X-Chunk-Index': index,
-          'X-Total-Chunks': totalChunks,
-          'X-File-Name': encodeURIComponent(file.name),
-          'X-Directory-Path': directoryPath,
-        };
-
-        try {
-          const response = await fetch(UPLOAD_URL, {
-            method: 'POST',
-            headers: headers,
-            body: chunk,
-          });
-          const serverDir = response.body.dir;
-          if (serverDir) {
-            directoryPath = serverDir;
-          }
-          return response.json();
-        } catch (error) {
-          throw error;
-        }
-      }
       async function uploadFile(file, fileId) {
         const progressContainer = document.createElement('div');
         progressContainer.className = 'progress-container';
@@ -499,9 +474,79 @@
         const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
         const fileCopy = new File([file], file.name, { type: file.type });
         const uploadQueue = [];
+        let directoryPath = null;
         let currentIndex = 0;
         let completedChunks = 0;
         let lastProgressUpdate = 0;
+        const uploadChunk = async (chunk, index, totalChunks, fileId, file) => {
+          const headers = {
+            'X-File-Id': fileId,
+            'X-Chunk-Index': index,
+            'X-Total-Chunks': totalChunks,
+            'X-File-Name': encodeURIComponent(file.name),
+            'X-Directory-Path': encodeURIComponent(directoryPath),
+          };
+          try {
+            const response = await fetch(UPLOAD_URL, {
+              method: 'POST',
+              headers: headers,
+              body: chunk,
+            });
+            const data = await response.json();
+            directoryPath = data.dir;
+            if (data.code == 200) {
+              saveFileInfo({
+                id: fileId,
+                name: data.name,
+                url: data.url || '',
+                size: file.size,
+                uploadTime: new Date().toISOString(),
+                progress: 100,
+              })
+                .then(() => {
+                  statusEl.innerHTML = `上传成功:${data.name}`;
+                  statusEl.className = 'status success';
+                  statusEl.style.display = 'block';
+                  return getAllFiles();
+                })
+                .then((files) => {
+                  renderHistoryList(files);
+                })
+                .catch((err) => {
+                  statusEl.textContent = '上传成功但保存记录失败';
+                  statusEl.className = 'status error';
+                  statusEl.style.display = 'block';
+                });
+              return data;
+            } else if (data.code === 0) {
+              statusEl.textContent = `上传失败:${data.msg}`;
+              statusEl.className = 'status error';
+              statusEl.style.display = 'block';
+              throw new Error(data.msg);
+            }
+            const progress = Math.floor(((index + 1) / totalChunks) * 100);
+            const progressFill = document.getElementById(
+              `progress-fill-${fileId}`
+            );
+            const progressText = document.getElementById(
+              `progress-text-${fileId}`
+            );
+            const historyProgress = document.querySelector(
+              `#history-progress-${fileId}.history-progress-fill`
+            );
+            if (progressFill) progressFill.style.width = progress + '%';
+            if (progressText) progressText.textContent = `进度:${progress}%`;
+            if (historyProgress) historyProgress.style.width = progress + '%';
+            if (progressFill) progressFill.style.display = 'none';
+            if (progressFill) progressFill.offsetHeight;
+            if (progressFill) progressFill.style.display = 'block';
+            return data;
+          } catch (error) {
+            console.log(error);
+
+            throw error;
+          }
+        };
         const updateProgress = async () => {
           const currentProgress = Math.floor(
             (completedChunks / totalChunks) * 100
@@ -619,73 +664,6 @@
         } catch (error) {
           showStatus('上传失败: ' + error.message, 'error');
         }
-      }
-      function uploadChunk(chunk, index, totalChunks, fileId, file) {
-        const headers = {
-          'X-File-Id': fileId,
-          'X-Chunk-Index': index,
-          'X-Total-Chunks': totalChunks,
-          'X-File-Name': encodeURIComponent(file.name),
-        };
-        return fetch(UPLOAD_URL, {
-          method: 'POST',
-          headers: headers,
-          body: chunk,
-        })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error(`HTTP error!status:${response.status}`);
-            }
-            return response.json();
-          })
-          .then((data) => {
-            if (data.code == 200) {
-              saveFileInfo({
-                id: fileId,
-                name: data.name,
-                url: data.url || '',
-                size: file.size,
-                uploadTime: new Date().toISOString(),
-                progress: 100,
-              })
-                .then(() => {
-                  statusEl.innerHTML = `上传成功:${data.name}`;
-                  statusEl.className = 'status success';
-                  statusEl.style.display = 'block';
-                  return getAllFiles();
-                })
-                .then((files) => {
-                  renderHistoryList(files);
-                })
-                .catch((err) => {
-                  statusEl.textContent = '上传成功但保存记录失败';
-                  statusEl.className = 'status error';
-                  statusEl.style.display = 'block';
-                });
-              return data;
-            } else if (data.code === 0) {
-              statusEl.textContent = `上传失败:${data.msg}`;
-              statusEl.className = 'status error';
-              statusEl.style.display = 'block';
-              throw new Error(data.msg);
-            }
-            const progress = Math.floor(((index + 1) / totalChunks) * 100);
-            const progressFill = document.getElementById(
-              `progress-fill-${fileId}`
-            );
-            const progressText = document.getElementById(
-              `progress-text-${fileId}`
-            );
-            const historyProgress = document.querySelector(
-              `#history-progress-${fileId}.history-progress-fill`
-            );
-            if (progressFill) progressFill.style.width = progress + '%';
-            if (progressText) progressText.textContent = `进度:${progress}%`;
-            if (historyProgress) historyProgress.style.width = progress + '%';
-            if (progressFill) progressFill.style.display = 'none';
-            if (progressFill) progressFill.offsetHeight;
-            if (progressFill) progressFill.style.display = 'block';
-          });
       }
       function resetStatus() {
         statusEl.style.display = 'none';

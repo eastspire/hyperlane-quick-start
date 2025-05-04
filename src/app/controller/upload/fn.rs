@@ -71,14 +71,17 @@ pub async fn handle(ctx: Context) {
         return;
     }
     let base_file_dir: String = match ctx.get_request_header(CHUNKIFY_DIRECTORY_HEADER).await {
-        Some(dir) => {
-            if dir.contains("../") {
+        Some(encode_dir) => {
+            let decode_dir: String = urlencoding::decode(&encode_dir)
+                .unwrap_or_default()
+                .into_owned();
+            if decode_dir.contains("../") {
                 get_base_file_dir()
-            } else if !dir.chars().all(|c| c.is_ascii_digit() || c == '/') {
+            } else if !decode_dir.chars().all(|c| c.is_ascii_digit() || c == '/') {
                 let _ = ctx.set_response_body("").await;
                 return;
             } else {
-                dir
+                decode_dir
             }
         }
         None => get_base_file_dir(),
