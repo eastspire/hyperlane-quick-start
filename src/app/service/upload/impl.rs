@@ -23,9 +23,7 @@ impl<'a> Default for UploadResponse<'a> {
         Self {
             code: 100,
             url: "",
-            name: "",
             msg: "",
-            base_file_dir: "",
         }
     }
 }

@@ -13,7 +13,5 @@ pub(crate) struct FileChunkData {
 pub(crate) struct UploadResponse<'a> {
     pub(crate) code: i32,
     pub(crate) url: &'a str,
-    pub(crate) name: &'a str,
     pub(crate) msg: &'a str,
-    pub(crate) base_file_dir: &'a str,
 }

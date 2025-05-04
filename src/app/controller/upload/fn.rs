@@ -6,14 +6,8 @@ pub async fn register(ctx: Context) {
         return;
     }
     let file_chunk_data: FileChunkData = file_chunk_data_opt.unwrap_or_default();
-    add_file_id_map(&file_chunk_data);
-    let mut data: UploadResponse<'_> = UploadResponse::default();
-    data.set_code(200)
-        .set_name(file_chunk_data.get_file_name())
-        .set_msg(OK)
-        .set_base_file_dir(file_chunk_data.get_base_file_dir());
-    let data_json: String = serde_json::to_string(&data).unwrap_or_default();
-    let _ = ctx.set_response_body(data_json).await;
+    add_file_id_map(&file_chunk_data).await;
+    set_common_success_response_body(&ctx, "").await;
 }
 
 pub async fn save(ctx: Context) {
@@ -44,27 +38,12 @@ pub async fn save(ctx: Context) {
         |a, b| format!("{a}.{b}"),
     )
     .unwrap();
-    let url: String = String::new();
-    let mut data: UploadResponse<'_> = UploadResponse::default();
     match upload_strategy.save_chunk(&chunk_data, *chunk_index).await {
         Ok(_) => {
-            data.set_code(200)
-                .set_url(&url)
-                .set_name(file_name)
-                .set_msg(OK)
-                .set_base_file_dir(base_file_dir);
-            let data_json: String = serde_json::to_string(&data).unwrap_or_default();
-            let _ = ctx.set_response_body(data_json).await;
+            set_common_success_response_body(&ctx, "").await;
         }
         Err(error) => {
-            let msg: String = error.to_string();
-            data.set_code(100)
-                .set_url(&url)
-                .set_name(file_name)
-                .set_msg(&msg)
-                .set_base_file_dir(base_file_dir);
-            let data_json: String = serde_json::to_string(&data).unwrap_or_default();
-            let _ = ctx.set_response_body(data_json).await;
+            set_common_error_response_body(&ctx, error.to_string()).await;
         }
     }
 }
@@ -93,27 +72,13 @@ pub async fn merge(ctx: Context) {
         encode(CHARSETS, &format!("{base_file_dir}/{file_id}")).unwrap_or_default();
     let url_encode_dir_file_name: String = encode(CHARSETS, &file_name).unwrap_or_default();
     let url: String = format!("/{STATIC_ROUTE}/{url_encode_dir}/{url_encode_dir_file_name}");
-    let mut data: UploadResponse<'_> = UploadResponse::default();
     match upload_strategy.merge_chunks().await {
         Ok(_) => {
-            remove_file_id_map(&file_id);
-            data.set_code(200)
-                .set_url(&url)
-                .set_name(file_name)
-                .set_msg(OK)
-                .set_base_file_dir(base_file_dir);
-            let data_json: String = serde_json::to_string(&data).unwrap_or_default();
-            let _ = ctx.set_response_body(data_json).await;
+            remove_file_id_map(&file_id).await;
+            set_common_success_response_body(&ctx, &url).await;
         }
         Err(error) => {
-            let msg: String = error.to_string();
-            data.set_code(100)
-                .set_url(&url)
-                .set_name(file_name)
-                .set_msg(&msg)
-                .set_base_file_dir(base_file_dir);
-            let data_json: String = serde_json::to_string(&data).unwrap_or_default();
-            let _ = ctx.set_response_body(data_json).await;
+            set_common_error_response_body(&ctx, error.to_string()).await;
         }
     }
 }

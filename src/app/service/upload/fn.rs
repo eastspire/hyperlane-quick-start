@@ -4,8 +4,7 @@ pub(crate) async fn get_register_file_chunk_data<'a>(ctx: &'a Context) -> Option
     let file_id: String = match ctx.get_request_header(CHUNKIFY_FILE_ID_HEADER).await {
         Some(id) => id,
         None => {
-            let _ = ctx
-                .set_response_body(ChunkStrategyError::MissingFileId)
+            set_common_error_response_body(ctx, ChunkStrategyError::MissingFileId.to_string())
                 .await;
             return None;
         }
@@ -14,15 +13,16 @@ pub(crate) async fn get_register_file_chunk_data<'a>(ctx: &'a Context) -> Option
         Some(total) => match total.parse::<usize>() {
             Ok(t) => t,
             Err(_) => {
-                let _ = ctx
-                    .set_response_body(ChunkStrategyError::InvalidTotalChunks)
-                    .await;
+                set_common_error_response_body(
+                    ctx,
+                    ChunkStrategyError::InvalidTotalChunks.to_string(),
+                )
+                .await;
                 return None;
             }
         },
         None => {
-            let _ = ctx
-                .set_response_body(ChunkStrategyError::MissingTotalChunks)
+            set_common_error_response_body(ctx, ChunkStrategyError::MissingTotalChunks.to_string())
                 .await;
             return None;
         }
@@ -30,8 +30,7 @@ pub(crate) async fn get_register_file_chunk_data<'a>(ctx: &'a Context) -> Option
     let file_name: String = match ctx.get_request_header(CHUNKIFY_FILE_NAME_HEADER).await {
         Some(name) => urlencoding::decode(&name).unwrap_or_default().into_owned(),
         None => {
-            let _ = ctx
-                .set_response_body(ChunkStrategyError::MissingFileName)
+            set_common_error_response_body(ctx, ChunkStrategyError::MissingFileName.to_string())
                 .await;
             return None;
         }
@@ -67,15 +66,16 @@ pub(crate) async fn get_save_file_chunk_data<'a>(ctx: &'a Context) -> OptionFile
         Some(idx) => match idx.parse::<usize>() {
             Ok(i) => i,
             Err(_) => {
-                let _ = ctx
-                    .set_response_body(ChunkStrategyError::InvalidChunkIndex)
-                    .await;
+                set_common_error_response_body(
+                    ctx,
+                    ChunkStrategyError::InvalidChunkIndex.to_string(),
+                )
+                .await;
                 return None;
             }
         },
         None => {
-            let _ = ctx
-                .set_response_body(ChunkStrategyError::MissingChunkIndex)
+            set_common_error_response_body(ctx, ChunkStrategyError::MissingChunkIndex.to_string())
                 .await;
             return None;
         }
@@ -84,20 +84,24 @@ pub(crate) async fn get_save_file_chunk_data<'a>(ctx: &'a Context) -> OptionFile
     Some(data)
 }
 
-pub(crate) fn add_file_id_map(data: &FileChunkData) {
+pub(crate) async fn add_file_id_map(data: &FileChunkData) {
     FILE_ID_MAP.insert(data.file_id.to_owned(), data.clone());
 }
 
-pub(crate) fn remove_file_id_map(file_id: &str) {
+pub(crate) async fn remove_file_id_map(file_id: &str) {
     FILE_ID_MAP.remove(file_id);
 }
 
 pub(crate) async fn get_merge_file_chunk_data<'a>(ctx: &Context) -> OptionFileChunkData {
-    let key: String = ctx
-        .get_request_header(CHUNKIFY_FILE_ID_HEADER)
-        .await
-        .unwrap_or_default();
-    let data_opt = FILE_ID_MAP.get(&key);
+    let file_id: String = match ctx.get_request_header(CHUNKIFY_FILE_ID_HEADER).await {
+        Some(id) => id,
+        None => {
+            set_common_error_response_body(ctx, ChunkStrategyError::MissingFileId.to_string())
+                .await;
+            return None;
+        }
+    };
+    let data_opt = FILE_ID_MAP.get(&file_id);
     if data_opt.is_none() {
         return None;
     }

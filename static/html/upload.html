@@ -638,9 +638,6 @@
                 }
               });
             uploadQueue.push(uploadPromise);
-            if (!currentIndex) {
-              await Promise.race(uploadQueue);
-            }
             currentIndex++;
           }
           const results = await Promise.all(uploadQueue);
