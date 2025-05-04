@@ -6,5 +6,5 @@ pub(crate) use bin_encode_decode::*;
 pub(crate) use hyperlane::*;
 
 fn main() {
-    init::server::func::run();
+    init::server::r#fn::run();
 }
