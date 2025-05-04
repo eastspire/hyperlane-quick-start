@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>文件上传</title>
+    <title>File Upload</title>
     <style>
       body {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -320,10 +320,10 @@
     </style>
   </head>
   <body>
-    <h1>文件上传</h1>
+    <h1>File Upload</h1>
     <div class="upload-container">
       <div class="file-input-container">
-        <label for="file-input" class="file-input-label">选择文件</label
+        <label for="file-input" class="file-input-label">Select File</label
         ><input type="file" id="file-input" class="file-input" multiple />
       </div>
       <div class="status" id="status" style="display: none"></div>
@@ -355,7 +355,7 @@
             await refreshData();
           })
           .catch((err) => {
-            throw new Error('数据库初始化失败:', err);
+            throw new Error('Database initialization failed:', err);
           });
       });
       function renderHistoryList(files) {
@@ -365,12 +365,12 @@
           historyContainer.className = 'history-container';
           document.querySelector('.upload-container').prepend(historyContainer);
         }
-        historyContainer.innerHTML = '<h2>上传历史记录</h2>';
+        historyContainer.innerHTML = '<h2>Upload History</h2>';
         files.sort(
           (a, b) => new Date(b.uploadTime || 0) - new Date(a.uploadTime || 0)
         );
         if (files.length === 0) {
-          historyContainer.innerHTML += '<p>暂无上传记录</p>';
+          historyContainer.innerHTML += '<p>No upload records</p>';
         } else {
           const list = document.createElement('ul');
           files.forEach((file) => {
@@ -501,7 +501,7 @@
                 progress: 100,
               })
                 .then(() => {
-                  statusEl.innerHTML = `上传成功:${data.name}`;
+                  statusEl.innerHTML = `Upload successful: ${data.name}`;
                   statusEl.className = 'status success';
                   statusEl.style.display = 'block';
                   return getAllFiles();
@@ -510,13 +510,14 @@
                   renderHistoryList(files);
                 })
                 .catch((err) => {
-                  statusEl.textContent = '上传成功但保存记录失败';
+                  statusEl.textContent =
+                    'Upload successful but failed to save record';
                   statusEl.className = 'status error';
                   statusEl.style.display = 'block';
                 });
               return data;
             } else if (data.code === 0) {
-              statusEl.textContent = `上传失败:${data.msg}`;
+              statusEl.textContent = `Upload failed: ${data.msg}`;
               statusEl.className = 'status error';
               statusEl.style.display = 'block';
               throw new Error(data.msg);
@@ -532,7 +533,8 @@
               `#history-progress-${fileId}.history-progress-fill`
             );
             if (progressFill) progressFill.style.width = progress + '%';
-            if (progressText) progressText.textContent = `进度:${progress}%`;
+            if (progressText)
+              progressText.textContent = `Progress: ${progress}%`;
             if (historyProgress) historyProgress.style.width = progress + '%';
             if (progressFill) progressFill.style.display = 'none';
             if (progressFill) progressFill.offsetHeight;
@@ -698,7 +700,7 @@
             uploadQueue = [];
             return mergeSuccessfulUploads;
           } else {
-            throw new Error('部分分片上传失败，请重试');
+            throw new Error('Some chunks failed to upload, please try again');
           }
         };
 
@@ -706,7 +708,7 @@
           await updateProgress();
           const lastChunkResponse = await processQueue();
           const data = lastChunkResponse || { url: '' };
-          showStatus('上传成功', 'success');
+          showStatus('Upload successful', 'success');
           const progressContainer = document.querySelector(
             `#progress-fill-${fileId}`
           )?.parentElement?.parentElement;
@@ -728,7 +730,7 @@
             url: data.url || '',
           });
         } catch (error) {
-          showStatus('上传失败: ' + error.message, 'error');
+          showStatus('Upload failed: ' + error.message, 'error');
         }
       }
       function resetStatus() {
