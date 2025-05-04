@@ -549,7 +549,7 @@
           const currentProgress = Math.floor(
             (completedChunks / totalChunks) * 100
           );
-          if (currentProgress > lastProgressUpdate) {
+          if (currentProgress >= lastProgressUpdate) {
             lastProgressUpdate = currentProgress;
             await saveFileInfo({
               id: fileId,
@@ -575,7 +575,6 @@
           }
         };
         const processQueue = async () => {
-          await updateProgress();
           while (currentIndex < totalChunks) {
             const start = currentIndex * CHUNK_SIZE;
             const end = Math.min(start + CHUNK_SIZE, fileCopy.size);
@@ -637,6 +636,7 @@
           }
         };
         try {
+          await updateProgress();
           const lastChunkResponse = await processQueue();
           const data = lastChunkResponse || { url: '' };
           showStatus('上传成功', 'success');
