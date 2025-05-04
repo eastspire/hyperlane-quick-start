@@ -575,6 +575,7 @@
           }
         };
         const processQueue = async () => {
+          await updateProgress();
           while (currentIndex < totalChunks) {
             const start = currentIndex * CHUNK_SIZE;
             const end = Math.min(start + CHUNK_SIZE, fileCopy.size);
