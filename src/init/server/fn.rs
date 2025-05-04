@@ -92,7 +92,10 @@ async fn register_route(server: &Server) {
         .route("/upload", controller::upload::r#fn::handle)
         .await;
     server
-        .route("/static", controller::r#static::r#fn::handle)
+        .route(
+            format!("/static/:{DIR_KEY}/:{FILE_KEY}"),
+            controller::r#static::r#fn::handle,
+        )
         .await;
     server
         .route("/favicon.ico", controller::favicon_ico::r#fn::handle)
