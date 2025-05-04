@@ -89,13 +89,10 @@ async fn register_response_middleware(server: &Server) {
 async fn register_route(server: &Server) {
     server.route("/", controller::root::r#fn::handle).await;
     server
-        .route(
-            format!("/hello/:{NAME_KEY}"),
-            controller::hello::r#fn::handle,
-        )
+        .route("/upload", controller::upload::r#fn::handle)
         .await;
     server
-        .route("/websocket", controller::websocket::r#fn::handle)
+        .route("/static", controller::r#static::r#fn::handle)
         .await;
     server
         .route("/favicon.ico", controller::favicon_ico::r#fn::handle)

@@ -19,7 +19,10 @@ exclude = [
 ]
 
 [dependencies]
+chunkify = "0.4.0"
 hyperlane = "4.90.1"
+bin-encode-decode = "0.2.0"
+serde = "1.0.219"
 
 [profile.dev]
 incremental = true
