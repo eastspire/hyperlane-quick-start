@@ -331,7 +331,9 @@
     <script>
       const CHUNK_SIZE = 256 * 1024;
       const MAX_RETRIES = 8;
-      const UPLOAD_URL = '/upload';
+      const UPLOAD_REGISTER_URL = '/upload/register';
+      const UPLOAD_SAVE_URL = '/upload/save';
+      const UPLOAD_MERGE_URL = '/upload/merge';
       const fileInput = document.getElementById('file-input');
       const statusEl = document.getElementById('status');
       const uploadBtnStyle = document.querySelector('.upload-btn');
@@ -343,13 +345,13 @@
       const DB_VERSION = 1;
       const STORE_NAME = 'uploadedFiles';
       let db = null;
+      async function refreshData() {
+        renderHistoryList(await getAllFiles());
+      }
       document.addEventListener('DOMContentLoaded', () => {
         initDB()
-          .then(() => {
-            return getAllFiles();
-          })
-          .then((files) => {
-            renderHistoryList(files);
+          .then(async () => {
+            await refreshData();
           })
           .catch((err) => {
             throw new Error('数据库初始化失败:', err);
@@ -437,7 +439,7 @@
               return;
             }
             const request = store.put(record);
-            request.onsuccess = () => resolve();
+            request.onsuccess = () => resolve(refreshData());
             request.onerror = (event) => reject(event.target.error);
           };
           getRequest.onerror = (event) => reject(event.target.error);
@@ -473,27 +475,21 @@
           .appendChild(progressContainer);
         const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
         const fileCopy = new File([file], file.name, { type: file.type });
-        const uploadQueue = [];
-        let directoryPath = '';
+        let uploadQueue = [];
         let currentIndex = 0;
         let completedChunks = 0;
         let lastProgressUpdate = 0;
         const uploadChunk = async (chunk, index, totalChunks, fileId, file) => {
-          const headers = {
-            'X-File-Id': fileId,
-            'X-Chunk-Index': index,
-            'X-Total-Chunks': totalChunks,
-            'X-File-Name': encodeURIComponent(file.name),
-            'X-Directory-Path': encodeURIComponent(directoryPath),
-          };
           try {
-            const response = await fetch(UPLOAD_URL, {
+            const response = await fetch(UPLOAD_SAVE_URL, {
               method: 'POST',
-              headers: headers,
+              headers: {
+                'X-File-Id': fileId,
+                'X-Chunk-Index': index,
+              },
               body: chunk,
             });
             const data = await response.json();
-            directoryPath = data.dir || '';
             if (data.code == 200) {
               saveFileInfo({
                 id: fileId,
@@ -575,6 +571,32 @@
           }
         };
         const processQueue = async () => {
+          const headers = {
+            'X-File-Id': fileId,
+          };
+          let registerSuccess = false;
+          let registerSuccessfulUploads = null;
+          while (!registerSuccess) {
+            try {
+              const response = await fetch(UPLOAD_REGISTER_URL, {
+                method: 'POST',
+                headers: {
+                  ...headers,
+                  'X-Total-Chunks': totalChunks,
+                  'X-File-Name': encodeURIComponent(file.name),
+                },
+              });
+              registerSuccessfulUploads = await response.json();
+              if (registerSuccessfulUploads.code == 200) {
+                registerSuccess = true;
+              }
+            } catch (error) {
+              registerSuccess = false;
+              await new Promise((resolve) =>
+                setTimeout(resolve, 1000 * retries)
+              );
+            }
+          }
           while (currentIndex < totalChunks) {
             const start = currentIndex * CHUNK_SIZE;
             const end = Math.min(start + CHUNK_SIZE, fileCopy.size);
@@ -615,25 +637,42 @@
                   }
                 }
               });
-            if (!currentIndex) {
-              uploadQueue.push(uploadPromise);
-              await Promise.race(uploadQueue);
-            } else if (uploadQueue.length + 1 == totalChunks) {
-              await Promise.all(uploadQueue);
-            }
             uploadQueue.push(uploadPromise);
+            if (!currentIndex) {
+              await Promise.race(uploadQueue);
+            }
             currentIndex++;
           }
           const results = await Promise.all(uploadQueue);
-          const successfulUploads = results.find(
-            (result) => result && result.code == 200 && result.url
-          );
-          if (successfulUploads) {
-            return successfulUploads;
+          let mergeSuccess = false;
+          let mergeSuccessfulUploads = null;
+          while (!mergeSuccess) {
+            try {
+              const response = await fetch(UPLOAD_MERGE_URL, {
+                method: 'POST',
+                headers: {
+                  'X-File-Id': fileId,
+                },
+              });
+              mergeSuccessfulUploads = await response.json();
+              if (registerSuccessfulUploads.code == 200) {
+                mergeSuccess = true;
+              }
+            } catch (error) {
+              mergeSuccess = false;
+              await new Promise((resolve) =>
+                setTimeout(resolve, 1000 * retries)
+              );
+            }
+          }
+          if (mergeSuccessfulUploads) {
+            uploadQueue = [];
+            return mergeSuccessfulUploads;
           } else {
             throw new Error('部分分片上传失败，请重试');
           }
         };
+
         try {
           await updateProgress();
           const lastChunkResponse = await processQueue();

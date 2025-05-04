@@ -1,68 +1,32 @@
 use super::*;
 
-fn get_base_file_dir() -> String {
-    let (year, month, day, hour, minute, _, _, _) = calculate_time();
-    let full_dir: String = format!("{}/{}/{}/{}/{}", year, month, day, hour, minute);
-    full_dir
+pub async fn register(ctx: Context) {
+    let file_chunk_data_opt: OptionFileChunkData = get_register_file_chunk_data(&ctx).await;
+    if file_chunk_data_opt.is_none() {
+        return;
+    }
+    let file_chunk_data: FileChunkData = file_chunk_data_opt.unwrap_or_default();
+    add_file_id_map(&file_chunk_data);
+    let mut data: UploadResponse<'_> = UploadResponse::default();
+    data.set_code(200)
+        .set_name(file_chunk_data.get_file_name())
+        .set_msg(OK)
+        .set_base_file_dir(file_chunk_data.get_base_file_dir());
+    let data_json: String = serde_json::to_string(&data).unwrap_or_default();
+    let _ = ctx.set_response_body(data_json).await;
 }
 
-pub async fn handle(ctx: Context) {
-    let file_id: String = match ctx.get_request_header(CHUNKIFY_FILE_ID_HEADER).await {
-        Some(id) => id,
-        None => {
-            let _ = ctx
-                .set_response_body(ChunkStrategyError::MissingFileId)
-                .await;
-            return;
-        }
-    };
-
-    let chunk_index: usize = match ctx.get_request_header(CHUNKIFY_CHUNK_INDEX_HEADER).await {
-        Some(idx) => match idx.parse::<usize>() {
-            Ok(i) => i,
-            Err(_) => {
-                let _ = ctx
-                    .set_response_body(ChunkStrategyError::InvalidChunkIndex)
-                    .await;
-                return;
-            }
-        },
-        None => {
-            let _ = ctx
-                .set_response_body(ChunkStrategyError::MissingChunkIndex)
-                .await;
-            return;
-        }
-    };
-
-    let total_chunks: usize = match ctx.get_request_header(CHUNKIFY_TOTAL_CHUNKS_HEADER).await {
-        Some(total) => match total.parse::<usize>() {
-            Ok(t) => t,
-            Err(_) => {
-                let _ = ctx
-                    .set_response_body(ChunkStrategyError::InvalidTotalChunks)
-                    .await;
-                return;
-            }
-        },
-        None => {
-            let _ = ctx
-                .set_response_body(ChunkStrategyError::MissingTotalChunks)
-                .await;
-            return;
-        }
-    };
-
-    let file_name: String = match ctx.get_request_header(CHUNKIFY_FILE_NAME_HEADER).await {
-        Some(name) => urlencoding::decode(&name).unwrap_or_default().into_owned(),
-        None => {
-            let _ = ctx
-                .set_response_body(ChunkStrategyError::MissingFileName)
-                .await;
-            return;
-        }
-    };
-
+pub async fn save(ctx: Context) {
+    let file_chunk_data_opt: OptionFileChunkData = get_save_file_chunk_data(&ctx).await;
+    if file_chunk_data_opt.is_none() {
+        return;
+    }
+    let file_chunk_data: FileChunkData = file_chunk_data_opt.unwrap_or_default();
+    let file_id: &str = file_chunk_data.get_file_id();
+    let file_name: &str = file_chunk_data.get_file_name();
+    let chunk_index: &usize = file_chunk_data.get_chunk_index();
+    let total_chunks: &usize = file_chunk_data.get_total_chunks();
+    let base_file_dir: &str = file_chunk_data.get_base_file_dir();
     let chunk_data: Vec<u8> = ctx.get_request_body().await;
     if chunk_data.is_empty() {
         let _ = ctx
@@ -70,57 +34,84 @@ pub async fn handle(ctx: Context) {
             .await;
         return;
     }
-    let base_file_dir: String = match ctx.get_request_header(CHUNKIFY_DIRECTORY_HEADER).await {
-        Some(encode_dir) => {
-            let decode_dir: String = urlencoding::decode(&encode_dir)
-                .unwrap_or_default()
-                .into_owned();
-            if decode_dir.is_empty() || decode_dir.contains("../") {
-                get_base_file_dir()
-            } else if !decode_dir.chars().all(|c| c.is_ascii_digit() || c == '/') {
-                let _ = ctx.set_response_body("").await;
-                return;
-            } else {
-                decode_dir
-            }
-        }
-        None => get_base_file_dir(),
-    };
-
     let save_upload_dir: String = format!("{UPLOAD_DIR}/{base_file_dir}/{file_id}");
-    let upload_strategy: ChunkStrategy =
-        ChunkStrategy::new(&save_upload_dir, |a, b| format!("{a}.{b}"));
-    let mut url: String = String::new();
-    if chunk_index + 1 == total_chunks {
-        let url_encode_dir: String =
-            encode(CHARSETS, &format!("{base_file_dir}/{file_id}")).unwrap_or_default();
-        let url_encode_dir_file_name: String = encode(CHARSETS, &file_name).unwrap_or_default();
-        url = format!("/{STATIC_ROUTE}/{url_encode_dir}/{url_encode_dir_file_name}");
-    }
-    match upload_strategy
-        .handle(&file_name, &chunk_data, &file_id, chunk_index, total_chunks)
-        .await
-    {
+    let upload_strategy: ChunkStrategy = ChunkStrategy::new(
+        0,
+        &save_upload_dir,
+        &file_id,
+        &file_name,
+        *total_chunks,
+        |a, b| format!("{a}.{b}"),
+    )
+    .unwrap();
+    let url: String = String::new();
+    let mut data: UploadResponse<'_> = UploadResponse::default();
+    match upload_strategy.save_chunk(&chunk_data, *chunk_index).await {
         Ok(_) => {
-            let code: i32 = if url.is_empty() { 100 } else { 200 };
-            let data: UploadResponse<'_> = UploadResponse {
-                code: code,
-                url: &url,
-                name: &file_name,
-                msg: OK,
-                dir: &base_file_dir,
-            };
+            data.set_code(200)
+                .set_url(&url)
+                .set_name(file_name)
+                .set_msg(OK)
+                .set_base_file_dir(base_file_dir);
             let data_json: String = serde_json::to_string(&data).unwrap_or_default();
             let _ = ctx.set_response_body(data_json).await;
         }
         Err(error) => {
-            let data: UploadResponse<'_> = UploadResponse {
-                code: 0,
-                url: &url,
-                name: &file_name,
-                msg: &error.to_string(),
-                dir: &base_file_dir,
-            };
+            let msg: String = error.to_string();
+            data.set_code(100)
+                .set_url(&url)
+                .set_name(file_name)
+                .set_msg(&msg)
+                .set_base_file_dir(base_file_dir);
+            let data_json: String = serde_json::to_string(&data).unwrap_or_default();
+            let _ = ctx.set_response_body(data_json).await;
+        }
+    }
+}
+
+pub async fn merge(ctx: Context) {
+    let file_chunk_data_opt: OptionFileChunkData = get_merge_file_chunk_data(&ctx).await;
+    if file_chunk_data_opt.is_none() {
+        return;
+    }
+    let file_chunk_data: FileChunkData = file_chunk_data_opt.unwrap_or_default();
+    let file_id: &str = file_chunk_data.get_file_id();
+    let file_name: &str = file_chunk_data.get_file_name();
+    let total_chunks: &usize = file_chunk_data.get_total_chunks();
+    let base_file_dir: &str = file_chunk_data.get_base_file_dir();
+    let save_upload_dir: String = format!("{UPLOAD_DIR}/{base_file_dir}/{file_id}");
+    let upload_strategy: ChunkStrategy = ChunkStrategy::new(
+        0,
+        &save_upload_dir,
+        &file_id,
+        &file_name,
+        *total_chunks,
+        |a, b| format!("{a}.{b}"),
+    )
+    .unwrap();
+    let url_encode_dir: String =
+        encode(CHARSETS, &format!("{base_file_dir}/{file_id}")).unwrap_or_default();
+    let url_encode_dir_file_name: String = encode(CHARSETS, &file_name).unwrap_or_default();
+    let url: String = format!("/{STATIC_ROUTE}/{url_encode_dir}/{url_encode_dir_file_name}");
+    let mut data: UploadResponse<'_> = UploadResponse::default();
+    match upload_strategy.merge_chunks().await {
+        Ok(_) => {
+            remove_file_id_map(&file_id);
+            data.set_code(200)
+                .set_url(&url)
+                .set_name(file_name)
+                .set_msg(OK)
+                .set_base_file_dir(base_file_dir);
+            let data_json: String = serde_json::to_string(&data).unwrap_or_default();
+            let _ = ctx.set_response_body(data_json).await;
+        }
+        Err(error) => {
+            let msg: String = error.to_string();
+            data.set_code(100)
+                .set_url(&url)
+                .set_name(file_name)
+                .set_msg(&msg)
+                .set_base_file_dir(base_file_dir);
             let data_json: String = serde_json::to_string(&data).unwrap_or_default();
             let _ = ctx.set_response_body(data_json).await;
         }

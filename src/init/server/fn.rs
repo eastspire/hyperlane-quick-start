@@ -89,7 +89,13 @@ async fn register_response_middleware(server: &Server) {
 async fn register_route(server: &Server) {
     server.route("/", controller::root::r#fn::handle).await;
     server
-        .route("/upload", controller::upload::r#fn::handle)
+        .route("/upload/register", controller::upload::r#fn::register)
+        .await;
+    server
+        .route("/upload/save", controller::upload::r#fn::save)
+        .await;
+    server
+        .route("/upload/merge", controller::upload::r#fn::merge)
         .await;
     server
         .route(

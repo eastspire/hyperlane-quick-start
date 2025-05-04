@@ -134,9 +134,9 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "chunkify"
-version = "0.4.0"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6691dc186674ea77dbefdd60c1160f8fee2cc6c8d1a490115b5c45b7cdd80c7"
+checksum = "bdc038594d468ecbaae818a35df27ba4b157cb4ff5349cfb47dbb9b50ffe4a0e"
 dependencies = [
  "dashmap",
  "file-operation",
