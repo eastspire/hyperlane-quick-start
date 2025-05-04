@@ -75,7 +75,7 @@ pub async fn handle(ctx: Context) {
             let decode_dir: String = urlencoding::decode(&encode_dir)
                 .unwrap_or_default()
                 .into_owned();
-            if decode_dir.contains("../") {
+            if decode_dir.is_empty() || decode_dir.contains("../") {
                 get_base_file_dir()
             } else if !decode_dir.chars().all(|c| c.is_ascii_digit() || c == '/') {
                 let _ = ctx.set_response_body("").await;

@@ -373,7 +373,7 @@
           files.forEach((file) => {
             const item = document.createElement('li');
             item.innerHTML = `<a href="${
-              file.url || '#'
+              file.url || '/'
             }"target="_blank"class="${
               file.progress >= 100 ? 'upload-complete' : ''
             }"><div class="history-item-header"><span class="filename">${
@@ -474,7 +474,7 @@
         const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
         const fileCopy = new File([file], file.name, { type: file.type });
         const uploadQueue = [];
-        let directoryPath = null;
+        let directoryPath = '';
         let currentIndex = 0;
         let completedChunks = 0;
         let lastProgressUpdate = 0;
@@ -493,7 +493,7 @@
               body: chunk,
             });
             const data = await response.json();
-            directoryPath = data.dir;
+            directoryPath = data.dir || '';
             if (data.code == 200) {
               saveFileInfo({
                 id: fileId,
@@ -542,8 +542,6 @@
             if (progressFill) progressFill.style.display = 'block';
             return data;
           } catch (error) {
-            console.log(error);
-
             throw error;
           }
         };
@@ -623,7 +621,7 @@
               });
             uploadQueue.push(uploadPromise);
             currentIndex++;
-            if (uploadQueue.length > 0) {
+            if (uploadQueue.length == 1) {
               await Promise.race(uploadQueue);
             }
           }
