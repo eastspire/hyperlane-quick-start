@@ -334,6 +334,7 @@
       const UPLOAD_REGISTER_URL = '/upload/register';
       const UPLOAD_SAVE_URL = '/upload/save';
       const UPLOAD_MERGE_URL = '/upload/merge';
+      const MAX_CONCURRENT_UPLOADS = 8;
       const fileInput = document.getElementById('file-input');
       const statusEl = document.getElementById('status');
       const uploadBtnStyle = document.querySelector('.upload-btn');
@@ -597,33 +598,47 @@
               );
             }
           }
-          while (currentIndex < totalChunks) {
-            const start = currentIndex * CHUNK_SIZE;
+          const tasks = [];
+          for (let i = 0; i < totalChunks; i++) {
+            const start = i * CHUNK_SIZE;
             const end = Math.min(start + CHUNK_SIZE, fileCopy.size);
             const chunk = fileCopy.slice(start, end);
-            const chunkIndex = currentIndex;
-            const uploadPromise = uploadChunk(
+            tasks.push({
               chunk,
-              chunkIndex,
+              index: i,
               totalChunks,
               fileId,
-              fileCopy
-            )
-              .then(async (result) => {
+              file: fileCopy,
+            });
+          }
+          async function processTasksWithConcurrencyLimit(
+            tasks,
+            concurrencyLimit
+          ) {
+            const results = [];
+            const runningTasks = new Set();
+            async function runTask(task) {
+              try {
+                const result = await uploadChunk(
+                  task.chunk,
+                  task.index,
+                  task.totalChunks,
+                  task.fileId,
+                  task.file
+                );
                 completedChunks++;
                 await updateProgress();
                 return result;
-              })
-              .catch(async (error) => {
+              } catch (error) {
                 let retries = 0;
                 while (retries < MAX_RETRIES) {
                   try {
                     const result = await uploadChunk(
-                      chunk,
-                      chunkIndex,
-                      totalChunks,
-                      fileId,
-                      fileCopy
+                      task.chunk,
+                      task.index,
+                      task.totalChunks,
+                      task.fileId,
+                      task.file
                     );
                     completedChunks++;
                     await updateProgress();
@@ -636,11 +651,28 @@
                     );
                   }
                 }
-              });
-            uploadQueue.push(uploadPromise);
-            currentIndex++;
+              }
+            }
+            while (tasks.length > 0 || runningTasks.size > 0) {
+              while (runningTasks.size < concurrencyLimit && tasks.length > 0) {
+                const task = tasks.shift();
+                const promise = runTask(task).then((result) => {
+                  runningTasks.delete(promise);
+                  results.push(result);
+                  return result;
+                });
+                runningTasks.add(promise);
+              }
+              if (runningTasks.size > 0) {
+                await Promise.race(Array.from(runningTasks));
+              }
+            }
+            return results;
           }
-          const results = await Promise.all(uploadQueue);
+          const results = await processTasksWithConcurrencyLimit(
+            tasks,
+            MAX_CONCURRENT_UPLOADS
+          );
           let mergeSuccess = false;
           let mergeSuccessfulUploads = null;
           while (!mergeSuccess) {
