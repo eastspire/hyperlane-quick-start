@@ -70,7 +70,17 @@ pub async fn handle(ctx: Context) {
             .await;
         return;
     }
-    let base_file_dir: String = get_base_file_dir();
+    let base_file_dir: String = match ctx.get_request_header(CHUNKIFY_DIRECTORY_HEADER).await {
+        Some(dir) => {
+            if !dir.chars().all(|c| c.is_ascii_digit() || c == '/') {
+                let _ = ctx.set_response_body("").await;
+                return;
+            }
+            dir
+        }
+        None => get_base_file_dir(),
+    };
+
     let save_upload_dir: String = format!("{UPLOAD_DIR}/{base_file_dir}/{file_id}");
     let upload_strategy: ChunkStrategy =
         ChunkStrategy::new(&save_upload_dir, |a, b| format!("{a}.{b}"));
@@ -92,6 +102,7 @@ pub async fn handle(ctx: Context) {
                 url: &url,
                 name: &file_name,
                 msg: OK,
+                dir: &base_file_dir,
             };
             let data_json: String = serde_json::to_string(&data).unwrap_or_default();
             let _ = ctx.set_response_body(data_json).await;
@@ -102,6 +113,7 @@ pub async fn handle(ctx: Context) {
                 url: &url,
                 name: &file_name,
                 msg: &error.to_string(),
+                dir: &base_file_dir,
             };
             let data_json: String = serde_json::to_string(&data).unwrap_or_default();
             let _ = ctx.set_response_body(data_json).await;

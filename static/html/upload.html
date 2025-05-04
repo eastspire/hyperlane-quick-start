@@ -330,11 +330,13 @@
     </div>
     <script>
       const CHUNK_SIZE = 256 * 1024;
+      const MAX_RETRIES = 8;
       const UPLOAD_URL = '/upload';
       const fileInput = document.getElementById('file-input');
       const statusEl = document.getElementById('status');
-      let selectedFile = null;
       const uploadBtnStyle = document.querySelector('.upload-btn');
+      let selectedFile = null;
+      let directoryPath = '';
       if (uploadBtnStyle) {
         uploadBtnStyle.remove();
       }
@@ -463,16 +465,31 @@
         });
         e.target.value = '';
       });
+      async function uploadChunk(chunk, index, totalChunks, fileId, file) {
+        const headers = {
+          'X-File-Id': fileId,
+          'X-Chunk-Index': index,
+          'X-Total-Chunks': totalChunks,
+          'X-File-Name': encodeURIComponent(file.name),
+          'X-Directory-Path': directoryPath,
+        };
+
+        try {
+          const response = await fetch(UPLOAD_URL, {
+            method: 'POST',
+            headers: headers,
+            body: chunk,
+          });
+          const serverDir = response.body.dir;
+          if (serverDir) {
+            directoryPath = serverDir;
+          }
+          return response.json();
+        } catch (error) {
+          throw error;
+        }
+      }
       async function uploadFile(file, fileId) {
-        await saveFileInfo({
-          id: fileId,
-          progress: 0,
-          name: file.name,
-          size: file.size,
-          uploadTime: new Date().toISOString(),
-          url: '',
-        });
-        await getAllFiles().then((files) => renderHistoryList(files));
         const progressContainer = document.createElement('div');
         progressContainer.className = 'progress-container';
         progressContainer.innerHTML = `<div class="progress-bar"><div class="progress-fill"id="progress-fill-${fileId}"></div></div>`;
@@ -538,7 +555,7 @@
               })
               .catch(async (error) => {
                 let retries = 0;
-                while (retries < 3) {
+                while (retries < MAX_RETRIES) {
                   try {
                     const result = await uploadChunk(
                       chunk,
@@ -552,7 +569,7 @@
                     return result;
                   } catch (retryError) {
                     retries++;
-                    if (retries === 3) throw retryError;
+                    if (retries === MAX_RETRIES) throw retryError;
                     await new Promise((resolve) =>
                       setTimeout(resolve, 1000 * retries)
                     );

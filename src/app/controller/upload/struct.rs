@@ -6,4 +6,5 @@ pub(crate) struct UploadResponse<'a> {
     pub(super) url: &'a str,
     pub(super) name: &'a str,
     pub(super) msg: &'a str,
+    pub(super) dir: &'a str,
 }
