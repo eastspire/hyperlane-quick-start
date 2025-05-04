@@ -72,11 +72,14 @@ pub async fn handle(ctx: Context) {
     }
     let base_file_dir: String = match ctx.get_request_header(CHUNKIFY_DIRECTORY_HEADER).await {
         Some(dir) => {
-            if !dir.chars().all(|c| c.is_ascii_digit() || c == '/') {
+            if dir.contains("../") {
+                get_base_file_dir()
+            } else if !dir.chars().all(|c| c.is_ascii_digit() || c == '/') {
                 let _ = ctx.set_response_body("").await;
                 return;
+            } else {
+                dir
             }
-            dir
         }
         None => get_base_file_dir(),
     };
