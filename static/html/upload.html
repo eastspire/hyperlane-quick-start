@@ -329,12 +329,12 @@
       <div class="status" id="status" style="display: none"></div>
     </div>
     <script>
-      const CHUNK_SIZE = 64 * 1024;
+      const CHUNK_SIZE = 512 * 1024;
       const MAX_RETRIES = 88888888;
       const UPLOAD_REGISTER_URL = '/upload/register';
       const UPLOAD_SAVE_URL = '/upload/save';
       const UPLOAD_MERGE_URL = '/upload/merge';
-      const MAX_CONCURRENT_UPLOADS = 10;
+      const MAX_CONCURRENT_UPLOADS = 6;
       const fileInput = document.getElementById('file-input');
       const statusEl = document.getElementById('status');
       const uploadBtnStyle = document.querySelector('.upload-btn');
