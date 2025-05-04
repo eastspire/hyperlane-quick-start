@@ -590,10 +590,6 @@
               .then(async (result) => {
                 completedChunks++;
                 await updateProgress();
-                const queueIndex = uploadQueue.indexOf(uploadPromise);
-                if (queueIndex > -1) {
-                  uploadQueue.splice(queueIndex, 1);
-                }
                 return result;
               })
               .catch(async (error) => {
@@ -619,10 +615,13 @@
                   }
                 }
               });
-            uploadQueue.push(uploadPromise);
             if (!currentIndex) {
+              uploadQueue.push(uploadPromise);
               await Promise.race(uploadQueue);
+            } else if (uploadQueue.length + 1 == totalChunks) {
+              await Promise.all(uploadQueue);
             }
+            uploadQueue.push(uploadPromise);
             currentIndex++;
           }
           const results = await Promise.all(uploadQueue);
