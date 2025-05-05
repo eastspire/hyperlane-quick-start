@@ -8,5 +8,3 @@ pub(crate) mod domain;
 pub(crate) mod param;
 pub(crate) mod persistent;
 pub(crate) mod view;
-
-pub(super) use super::*;

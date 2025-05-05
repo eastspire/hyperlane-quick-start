@@ -9,5 +9,5 @@ pub(crate) use chunkify::*;
 pub(crate) use hyperlane::*;
 
 fn main() {
-    init::server::r#fn::run();
+    init::server::run();
 }
