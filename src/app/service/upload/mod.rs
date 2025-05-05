@@ -9,7 +9,7 @@ pub(crate) use r#type::*;
 pub(super) use super::*;
 pub(super) use crate::once_cell::sync::Lazy;
 pub(super) use crate::utils::response::*;
-pub(super) use app::model::pojo::upload::*;
+pub(super) use app::model::business::upload::*;
 pub(super) use config::upload::r#const::*;
 pub(super) use utils::upload::*;
 
