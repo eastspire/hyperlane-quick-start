@@ -7,3 +7,5 @@ pub(crate) mod param;
 pub(crate) mod po;
 pub(crate) mod pojo;
 pub(crate) mod vo;
+
+pub(super) use super::*;

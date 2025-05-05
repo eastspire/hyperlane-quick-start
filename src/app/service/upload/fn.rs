@@ -85,7 +85,7 @@ pub(crate) async fn get_save_file_chunk_data<'a>(ctx: &'a Context) -> OptionFile
 }
 
 pub(crate) async fn add_file_id_map(data: &FileChunkData) {
-    FILE_ID_MAP.insert(data.file_id.to_owned(), data.clone());
+    FILE_ID_MAP.insert(data.get_file_id().to_owned(), data.clone());
 }
 
 pub(crate) async fn remove_file_id_map(file_id: &str) {

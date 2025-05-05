@@ -8,13 +8,13 @@ impl FileChunkData {
         total_chunks: usize,
         base_file_dir: String,
     ) -> Self {
-        Self {
-            file_id,
-            chunk_index,
-            total_chunks,
-            file_name,
-            base_file_dir,
-        }
+        let mut data: FileChunkData = FileChunkData::default();
+        data.set_file_id(file_id)
+            .set_file_name(file_name)
+            .set_chunk_index(chunk_index)
+            .set_total_chunks(total_chunks)
+            .set_base_file_dir(base_file_dir);
+        data
     }
 }
 
