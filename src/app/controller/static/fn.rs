@@ -8,7 +8,7 @@ pub async fn handle(ctx: Context) {
     if decode_dir.is_empty() || decode_file.is_empty() {
         return;
     }
-    let path: String = format!("{}/{}/{}", UPLOAD_DIR, decode_dir, decode_file);
+    let path: String = format!("{UPLOAD_DIR}/{decode_dir}/{decode_file}");
     let extension_name: String = FileExtension::get_extension_name(&decode_file);
     let content_type: &str = FileExtension::parse(&extension_name).get_content_type();
     let data: Vec<u8> = async_read_from_file(&path).await.unwrap_or_default();
