@@ -9,7 +9,7 @@ pub(crate) struct FileChunkData {
     pub(super) base_file_dir: String,
 }
 
-#[derive(Debug, Serialize, Lombok)]
+#[derive(Debug, Serialize, Lombok, Clone)]
 pub(crate) struct UploadResponse<'a> {
     pub(crate) code: i32,
     pub(crate) url: &'a str,

@@ -23,9 +23,7 @@ pub async fn save(ctx: Context) {
     let base_file_dir: &str = file_chunk_data.get_base_file_dir();
     let chunk_data: Vec<u8> = ctx.get_request_body().await;
     if chunk_data.is_empty() {
-        let _ = ctx
-            .set_response_body(ChunkStrategyError::EmptyChunkData)
-            .await;
+        set_common_error_response_body(&ctx, ChunkStrategyError::EmptyChunkData.to_string()).await;
         return;
     }
     let save_upload_dir: String = format!("{UPLOAD_DIR}/{base_file_dir}/{file_id}");

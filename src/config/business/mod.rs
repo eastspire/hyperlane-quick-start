@@ -1,4 +1,4 @@
-pub(crate) mod hello;
+pub(crate) mod charset;
 pub(crate) mod logo_img;
 pub(crate) mod not_found;
-pub(crate) mod templates;
+pub(crate) mod upload;

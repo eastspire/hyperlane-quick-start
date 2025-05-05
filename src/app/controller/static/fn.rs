@@ -20,6 +20,8 @@ pub async fn handle(ctx: Context) {
         .await
         .set_response_header(EXPIRES, "Wed, 1 Apr 8888 00:00:00 GMT")
         .await
+        .set_response_status_code(200)
+        .await
         .set_response_body(data)
         .await;
 }
