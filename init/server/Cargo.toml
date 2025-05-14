@@ -8,6 +8,8 @@ path = "lib.rs"
 
 [dependencies]
 hyperlane.workspace = true
-app.workspace = true
-config.workspace = true
-plugin.workspace = true
+config_business.workspace = true
+config_server.workspace = true
+plugin_server_manager.workspace = true
+app_controller.workspace = true
+app_middleware.workspace = true

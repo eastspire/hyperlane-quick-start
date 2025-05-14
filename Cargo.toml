@@ -20,25 +20,47 @@ exclude = [
 
 [workspace]
 members = [
-    "app",
-    "config",
-    "init",
-    "plugin"
+    "app/*",    
+    "config/*",
+    "init/*",
+    "plugin/*"
 ]
 
 [workspace.dependencies]
-hyperlane = "4.94.0"
-app = { path = "app" }
-config = { path = "config" }
-init = { path = "init" }
-plugin = { path = "plugin" }
+hyperlane = { path = "../hyperlane" }
+app_aspect = { path = "app/aspect" }
+app_controller = { path = "app/controller" }
+app_exception = { path = "app/exception" }
+app_filter = { path = "app/filter" }
+app_mapper = { path = "app/mapper" }
+app_middleware = { path = "app/middleware" }
+app_model = { path = "app/model" }
+app_service = { path = "app/service" }
+app_utils = { path = "app/utils" }
+app_view = { path = "app/view" }
+init_server = { path = "init/server" }
+config_business = { path = "config/business" }
+config_server = { path = "config/server" }
+config_server_manager = { path = "config/server_manager" }
+plugin_server_manager = { path = "plugin/server_manager" }
 
 [dependencies]
 hyperlane.workspace = true
-app.workspace = true
-config.workspace = true
-init.workspace = true
-plugin.workspace = true
+app_aspect.workspace = true
+app_controller.workspace = true
+app_exception.workspace = true
+app_filter.workspace = true
+app_mapper.workspace = true
+app_middleware.workspace = true
+app_model.workspace = true
+app_service.workspace = true
+app_utils.workspace = true
+app_view.workspace = true
+config_business.workspace = true
+config_server.workspace = true
+config_server_manager.workspace = true
+init_server.workspace = true
+plugin_server_manager.workspace = true
 
 [profile.dev]
 incremental = true

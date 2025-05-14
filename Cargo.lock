@@ -52,109 +52,93 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "683d7910e743518b0e34f1186f92494becacb047c7b6bf616c96772180fef923"
 
 [[package]]
-name = "app"
-version = "0.1.0"
-dependencies = [
- "app_aspect",
- "app_controller",
- "app_exception",
- "app_filter",
- "app_mapper",
- "app_middleware",
- "app_model",
- "app_service",
- "app_utils",
- "app_view",
-]
-
-[[package]]
 name = "app_aspect"
 version = "0.1.0"
 dependencies = [
- "config",
+ "config_business",
  "hyperlane",
- "plugin",
+ "plugin_server_manager",
 ]
 
 [[package]]
 name = "app_controller"
 version = "0.1.0"
 dependencies = [
- "config",
+ "config_business",
  "hyperlane",
- "plugin",
+ "plugin_server_manager",
 ]
 
 [[package]]
 name = "app_exception"
 version = "0.1.0"
 dependencies = [
- "config",
+ "config_business",
  "hyperlane",
- "plugin",
+ "plugin_server_manager",
 ]
 
 [[package]]
 name = "app_filter"
 version = "0.1.0"
 dependencies = [
- "config",
+ "config_business",
  "hyperlane",
- "plugin",
+ "plugin_server_manager",
 ]
 
 [[package]]
 name = "app_mapper"
 version = "0.1.0"
 dependencies = [
- "config",
+ "config_business",
  "hyperlane",
- "plugin",
+ "plugin_server_manager",
 ]
 
 [[package]]
 name = "app_middleware"
 version = "0.1.0"
 dependencies = [
- "config",
+ "config_business",
  "hyperlane",
- "plugin",
+ "plugin_server_manager",
 ]
 
 [[package]]
 name = "app_model"
 version = "0.1.0"
 dependencies = [
- "config",
+ "config_business",
  "hyperlane",
- "plugin",
+ "plugin_server_manager",
 ]
 
 [[package]]
 name = "app_service"
 version = "0.1.0"
 dependencies = [
- "config",
+ "config_business",
  "hyperlane",
- "plugin",
+ "plugin_server_manager",
 ]
 
 [[package]]
 name = "app_utils"
 version = "0.1.0"
 dependencies = [
- "config",
+ "config_business",
  "hyperlane",
- "plugin",
+ "plugin_server_manager",
 ]
 
 [[package]]
 name = "app_view"
 version = "0.1.0"
 dependencies = [
- "config",
+ "config_business",
  "hyperlane",
- "plugin",
+ "plugin_server_manager",
 ]
 
 [[package]]
@@ -236,15 +220,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "47a70e27f954a060626fdba6829cdded6c3dae6376d0e03822363114aaead8a8"
 dependencies = [
  "hyperlane-time",
-]
-
-[[package]]
-name = "config"
-version = "0.1.0"
-dependencies = [
- "config_business",
- "config_server",
- "config_server_manager",
 ]
 
 [[package]]
@@ -566,8 +541,6 @@ dependencies = [
 [[package]]
 name = "hyperlane"
 version = "4.94.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3729f28d6eabc3106bff87c6d22e948234edc58cac893ad0b886f9edf6460759"
 dependencies = [
  "clonelicious",
  "color-output",
@@ -575,6 +548,14 @@ dependencies = [
  "future-fn",
  "http-type",
  "hyperlane-log",
+ "hyperlane_config",
+ "hyperlane_context",
+ "hyperlane_handler",
+ "hyperlane_middleware",
+ "hyperlane_route",
+ "hyperlane_server",
+ "hyperlane_tmp",
+ "hyperlane_utils",
  "recoverable-spawn",
  "recoverable-thread-pool",
  "server-manager",
@@ -596,11 +577,22 @@ dependencies = [
 name = "hyperlane-quick-start"
 version = "1.0.1"
 dependencies = [
- "app",
- "config",
+ "app_aspect",
+ "app_controller",
+ "app_exception",
+ "app_filter",
+ "app_mapper",
+ "app_middleware",
+ "app_model",
+ "app_service",
+ "app_utils",
+ "app_view",
+ "config_business",
+ "config_server",
+ "config_server_manager",
  "hyperlane",
- "init",
- "plugin",
+ "init_server",
+ "plugin_server_manager",
 ]
 
 [[package]]
@@ -608,6 +600,79 @@ name = "hyperlane-time"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d0f69051b8978d37eb5a3d8f700a39159d40d7646f1aef8d2f3e441279f4dfa1"
+
+[[package]]
+name = "hyperlane_config"
+version = "0.1.0"
+dependencies = [
+ "http-type",
+ "hyperlane-log",
+]
+
+[[package]]
+name = "hyperlane_context"
+version = "0.1.0"
+dependencies = [
+ "http-type",
+ "hyperlane-log",
+ "hyperlane_route",
+]
+
+[[package]]
+name = "hyperlane_handler"
+version = "0.1.0"
+dependencies = [
+ "http-type",
+ "hyperlane-log",
+]
+
+[[package]]
+name = "hyperlane_middleware"
+version = "0.1.0"
+dependencies = [
+ "http-type",
+ "hyperlane_handler",
+]
+
+[[package]]
+name = "hyperlane_route"
+version = "0.1.0"
+dependencies = [
+ "http-type",
+ "hyperlane_handler",
+]
+
+[[package]]
+name = "hyperlane_server"
+version = "0.1.0"
+dependencies = [
+ "color-output",
+ "http-type",
+ "hyperlane-log",
+ "hyperlane_config",
+ "hyperlane_context",
+ "hyperlane_handler",
+ "hyperlane_middleware",
+ "hyperlane_route",
+ "hyperlane_tmp",
+ "hyperlane_utils",
+]
+
+[[package]]
+name = "hyperlane_tmp"
+version = "0.1.0"
+dependencies = [
+ "http-type",
+ "hyperlane-log",
+]
+
+[[package]]
+name = "hyperlane_utils"
+version = "0.1.0"
+dependencies = [
+ "hyperlane-log",
+ "hyperlane_tmp",
+]
 
 [[package]]
 name = "icu_collections"
@@ -717,20 +782,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "init"
-version = "0.1.0"
-dependencies = [
- "init_server",
-]
-
-[[package]]
 name = "init_server"
 version = "0.1.0"
 dependencies = [
- "app",
- "config",
+ "app_controller",
+ "app_middleware",
+ "config_business",
+ "config_server",
  "hyperlane",
- "plugin",
+ "plugin_server_manager",
 ]
 
 [[package]]
@@ -890,17 +950,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
 
 [[package]]
-name = "plugin"
-version = "0.1.0"
-dependencies = [
- "plugin_server_manager",
-]
-
-[[package]]
 name = "plugin_server_manager"
 version = "0.1.0"
 dependencies = [
- "config",
+ "config_server_manager",
  "hyperlane",
 ]
 

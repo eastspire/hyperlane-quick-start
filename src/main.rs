@@ -1,9 +1,5 @@
-pub use app;
-pub use config;
-pub use hyperlane::*;
-pub use init;
-pub use plugin;
+pub use init_server;
 
 fn main() {
-    init::server::service::run();
+    init_server::service::run();
 }

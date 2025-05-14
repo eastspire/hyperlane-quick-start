@@ -8,4 +8,4 @@ path = "lib.rs"
 
 [dependencies]
 hyperlane.workspace = true
-config.workspace = true
+config_server_manager.workspace = true
