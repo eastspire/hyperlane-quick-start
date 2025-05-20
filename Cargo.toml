@@ -2,11 +2,11 @@
 name = "hyperlane-quick-start"
 version = "0.80.0"
 edition = "2024"
-authors = ["ltpp-universe <root@ltpp.vip>"] 
+authors = ["root@ltpp.vip"] 
 license = "MIT"
 description = """Hyperlane is a lightweight and high-performance Rust HTTP server library designed to simplify network service development. It supports HTTP request parsing, response building, and TCP communication, making it ideal for building modern web services. Additionally, it provides support for request and response middleware, WebSocket, and Server-Sent Events (SSE), enabling flexible and efficient real-time communication. Built with pure Rust and standard library, Hyperlane offers true cross-platform compatibility across Windows, Linux and macOS, with the same API experience on all platforms, powered by Tokio's async runtime for seamless networking without platform-specific dependencies."""
 keywords = ["http", "request", "response", "tcp", "cross-platform"]
-repository = "https://github.com/ltpp-universe/hyperlane-quick-start.git"
+repository = "https://github.com/eastspire/hyperlane-quick-start.git"
 categories = ["network-programming", "web-programming"]
 exclude = [
     "target",
@@ -19,9 +19,9 @@ exclude = [
 ]
 
 [dependencies]
-chunkify = "0.6.0"
-hyperlane = "4.93.0"
-bin-encode-decode = "0.2.1"
+chunkify = "0.6.2"
+hyperlane = "4.99.2"
+bin-encode-decode = "0.2.4"
 serde = "1.0.219"
 
 [profile.dev]
