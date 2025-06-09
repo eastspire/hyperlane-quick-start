@@ -8,7 +8,7 @@ pub async fn on_connected(_: Context) {
     tokio::spawn(async move {
         let websocket: &WebSocket = get_global_websocket();
         let key: BroadcastType<'_> = BroadcastType::PointToGroup("/");
-        let receiver_count: ReceiverCount = websocket.receiver_count(key).unwrap_or_default();
+        let receiver_count: ReceiverCount = websocket.receiver_count(key);
         let data: String = format!("Current online client count: {}", receiver_count);
         websocket.send(key, data).unwrap();
     });
@@ -17,9 +17,7 @@ pub async fn on_connected(_: Context) {
 pub(crate) async fn on_closed(ctx: Context) {
     let websocket: &WebSocket = get_global_websocket();
     let key: BroadcastType<'_> = BroadcastType::PointToGroup("/");
-    let receiver_count: ReceiverCount = websocket
-        .pre_decrement_receiver_count(key)
-        .unwrap_or_default();
+    let receiver_count: ReceiverCount = websocket.receiver_count_after_decrement(key);
     let body: String = format!("Current online client count: {}", receiver_count);
     ctx.set_response_body(body).await;
 }
