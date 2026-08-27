@@ -188,22 +188,17 @@ wasm-opt = [
 ]
 
 [profile.dev]
-incremental = false
-opt-level = "z"
-lto = true
-panic = "unwind"
-debug = false
-codegen-units = 1
-strip = "debuginfo"
+opt-level = 0
+debug = true
+incremental = true
+codegen-units = 256
 
 [profile.release]
-incremental = false
-opt-level = "z"
-lto = true
-panic = "unwind"
+opt-level = "s"
+lto = "thin"
+codegen-units = 16
 debug = false
-codegen-units = 1
-strip = "debuginfo"
+strip = "symbols"
 "#;
 
 /// `www/index.html` shell injected into every playground build. Uses `src=`
