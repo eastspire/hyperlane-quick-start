@@ -11,7 +11,11 @@ pub const REPOSITORY_KEY: &str = "repository";
 ///
 /// Each tuple contains `(owner, repository)` pairs that will be automatically
 /// synced when the server starts, fetching the latest resources from GitHub Pages.
-pub const SYNC_REPOSITORIES: &[(&str, &str)] = &[("euv-dev", "euv"), ("docs-pages", "pages")];
+pub const SYNC_REPOSITORIES: &[(&str, &str)] = &[
+    ("euv-dev", "euv"),
+    ("euv-dev", "euv-docs"),
+    ("docs-pages", "pages"),
+];
 
 /// Message queue topic name for GitHub Pages sync tasks.
 pub const TOPIC_GITHUB_PAGES_SYNC: &str = "github_pages_sync";
